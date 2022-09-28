@@ -3,6 +3,7 @@ datasetSentences.txt
 test_embeddings/*
 test_sentences/*
 embed_test_sentences.py
+data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
