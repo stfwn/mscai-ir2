@@ -43,6 +43,13 @@ def main():
     # Initialize model to compute passage embeddings
     model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5")
 
+    # Compute passage embeddings
+    docs = docs.map(
+        encoding.encode_passages,
+        fn_kwargs={"encode_fn": model.encode},
+        keep_in_memory=config.use_cache,
+    )
+
     # Compute document embeddings
     docs = docs.map(
         encoding.encode_doc,
@@ -71,8 +78,6 @@ def main():
         fn_kwargs={"encode_fn": model.encode, "docs": docs},
         keep_in_memory=config.use_cache,
     )
-
-    breakpoint()
 
 
 if __name__ == "__main__":

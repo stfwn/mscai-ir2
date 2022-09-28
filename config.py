@@ -1,6 +1,6 @@
 import os
 
-stage = os.environ.get("IR2STAGE", "DEV")
+stage = os.environ.get("IR2STAGE", "PROD")
 
 passage_size = 400
 tokenization_method = "spaces"
