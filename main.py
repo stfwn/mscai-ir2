@@ -1,5 +1,6 @@
 import os
 from typing import Callable
+from faiss_indexer import FaissIndexer
 
 from model import Model
 
@@ -49,7 +50,9 @@ def main():
 
     example_doc = [
                     "Around 9 Million people live in London", 
-                    "London is known for its financial district"
+                    "London is known for its financial district",
+                    "Bangkok is the capital of Thailand",
+                    "The new macbook M2 line is the best of the best"
                     ]
 
     example_embeddings = model.encode_passages(example_doc)
@@ -57,7 +60,24 @@ def main():
 
 
     # (3) Build FAISS index
-    raise NotImplementedError
+    faiss_index = FaissIndexer()
+    faiss_index.set_embeddings(example_embeddings)
+    faiss_index.create_index("L2")
+
+    # Some example cases using the example docs
+    example_sentence = 'What is the capital of Thailand'
+    example_query = model.encode_query(example_sentence)
+    D, I = faiss_index.search(example_query, k=1)
+    print(example_sentence)
+    print(example_doc[I[0][0]])
+    print('\n')
+
+    example_sentence = "I live in the capital of England"
+    example_query = model.encode_query(example_sentence)
+    D, I = faiss_index.search(example_query, k=4)
+    ranking = [example_doc[I[0][i]] for i in I[0]]
+    print(example_sentence)
+    print(ranking)
 
     # (4) Compute score on dev set
     raise NotImplementedError

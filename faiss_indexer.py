@@ -21,6 +21,11 @@ class FaissIndexer():
         self.embeddings = np.array(embeddings)
         self.dimension = self.embeddings.shape[1]
 
+    def set_embeddings(self, embeddings):
+        # Sets embeddings without loading them from folder
+        self.embeddings = embeddings
+        self.dimension = self.embeddings.shape[1]
+
     def create_index(self, index_type):
         if index_type == 'L2':
             self.index = faiss.IndexFlatL2(self.dimension)
