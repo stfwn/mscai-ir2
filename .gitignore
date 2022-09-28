@@ -1,3 +1,9 @@
+## IR2 stuff
+datasetSentences.txt
+test_embeddings/*
+test_sentences/*
+embed_test_sentences.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
