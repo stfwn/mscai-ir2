@@ -7,3 +7,5 @@ tokenization_method = "spaces"
 prepend_title_to_passage = True
 
 use_cache = False if stage == "DEV" else True
+
+ranking_size = 100
