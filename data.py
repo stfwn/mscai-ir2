@@ -29,25 +29,6 @@ class MSMarcoDocs:
                 }
             ),
         )
-        relevance_scores = self.get_relevance_scores()
-        relevance_scores["dev"] = relevance_scores["dev"].set_index("query_id")
-        relevance_scores["train"] = relevance_scores["train"].set_index("query_id")
-
-        def match_relevant_docs(query, relevance_scores: pd.DataFrame):
-            query["relevant_doc"] = relevance_scores.loc[query["query_id"]].doc_id
-            return query
-
-        queries["train"] = queries["train"].map(
-            match_relevant_docs,
-            fn_kwargs={"relevance_scores": relevance_scores["train"]},
-            num_proc=os.cpu_count(),
-        )
-        queries["dev"] = queries["dev"].map(
-            match_relevant_docs,
-            fn_kwargs={"relevance_scores": relevance_scores["dev"]},
-            num_proc=os.cpu_count(),
-        )
-
         return queries
 
     def get_docs(self) -> datasets.DatasetDict:
