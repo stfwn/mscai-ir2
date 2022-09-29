@@ -32,7 +32,7 @@ def main():
 
     docs = docs.map(
         preprocessing.doc_to_passages,
-        num_proc=os.cpu_count(),
+        # num_proc=os.cpu_count(),
         fn_kwargs={
             "passage_size": config.passage_size,
             "tokenization_method": config.tokenization_method,
