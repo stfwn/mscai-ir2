@@ -4,7 +4,7 @@ import datasets
 import pandas as pd
 import psutil
 
-datasets.config.IN_MEMORY_MAX_SIZE = psutil.virtual_memory().available
+# datasets.config.IN_MEMORY_MAX_SIZE = psutil.virtual_memory().available
 
 
 class MSMarcoDocs:

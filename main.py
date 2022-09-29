@@ -1,14 +1,14 @@
 from typing import Callable
 import os
 
-from sentence_transformers import SentenceTransformer, util
 from datasets import Dataset
+from sentence_transformers import SentenceTransformer, util
+import torch
 
 import config
 from data import MSMarcoDocs
 import encoding
 import preprocessing
-
 
 
 def main():
@@ -42,7 +42,10 @@ def main():
     )
 
     # Initialize model to compute passage embeddings
-    model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5").to(
+        device
+    )
 
     # Compute passage embeddings
     docs = docs.map(
