@@ -32,13 +32,12 @@ def main():
 
     docs = docs.map(
         preprocessing.doc_to_passages,
-        # num_proc=os.cpu_count(),
         fn_kwargs={
             "passage_size": config.passage_size,
             "tokenization_method": config.tokenization_method,
             "prepend_title_to_passage": config.prepend_title_to_passage,
         },
-        keep_in_memory=config.use_cache,
+        keep_in_memory=config.keep_in_memory,
     )
 
     # Initialize model to compute passage embeddings
@@ -51,7 +50,7 @@ def main():
     docs = docs.map(
         encoding.encode_passages,
         fn_kwargs={"encode_fn": model.encode},
-        keep_in_memory=config.use_cache,
+        keep_in_memory=config.keep_in_memory,
     )
 
     # Compute document embeddings
@@ -61,7 +60,7 @@ def main():
             "encode_fn": model.encode,
             "method": "mean_passage_embeddings",
         },
-        keep_in_memory=config.use_cache,
+        keep_in_memory=config.keep_in_memory,
     )
 
     try:
@@ -80,7 +79,7 @@ def main():
     queries = queries.map(
         rank,
         fn_kwargs={"encode_fn": model.encode, "docs": docs},
-        keep_in_memory=config.use_cache,
+        keep_in_memory=config.keep_in_memory,
     )
 
 
