@@ -22,13 +22,11 @@ def encode_passages(doc: dict, encode_fn: Callable):
 
 def encode_doc(
     doc: dict,
-    encode_fn: Callable,
     method: Literal["mean_passage_embeddings", "max_passage_embeddings"],
 ):
     """
     Args:
         - doc: Dict with at least a 'passages' key with a list of {'passage_id': str, 'passage_body': str, 'passage_embedding': tensor}
-        - encode_fn: Takes a str and returns an embedding.
         - method:
             - mean_passage_embeddings: doc
     """
