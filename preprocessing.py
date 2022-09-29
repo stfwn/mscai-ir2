@@ -37,4 +37,5 @@ def doc_to_passages(
         }
         for i, passage in enumerate(doc["passages"])
     ]
+    del doc["body"]
     return doc
