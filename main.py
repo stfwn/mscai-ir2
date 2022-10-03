@@ -9,6 +9,7 @@ import config
 from data import MSMarcoDocs
 import encoding
 import preprocessing
+from evaluation import evaluate
 
 
 def main():
@@ -80,6 +81,9 @@ def main():
         fn_kwargs={"encode_fn": model.encode, "docs": docs},
         keep_in_memory=config.keep_in_memory,
     )
+
+    print(evaluate(queries["train"], qrels_path="data/ms-marco/msmarco-doctrain-qrels.tsv"))
+    print(evaluate(queries["dev"], qrels_path="data/ms-marco/msmarco-docdev-qrels.tsv"))
 
 
 if __name__ == "__main__":
