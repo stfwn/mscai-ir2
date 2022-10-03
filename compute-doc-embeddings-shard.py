@@ -15,12 +15,18 @@ import preprocessing
 
 
 def main(args):
-    print("=" * 20)
+    print("=" * 10)
     print("Number of shards:", args.n_shards)
     print("Computing shard:", args.shard_index)
-    print("=" * 20)
+    print("=" * 10)
 
-    print("Loading docs shard")
+    print("==> Initializing model")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5").to(
+        device
+    )
+
+    print("==> Loading docs shard")
     ms_marco_docs = MSMarcoDocs()
     docs = (
         ms_marco_docs.get_docs()
@@ -30,46 +36,31 @@ def main(args):
             index=args.shard_index,
             contiguous=True,
         )
+        .filter(lambda d: d["body"] != "" and d["body"] is not None)
     )
-
-    print("Splitting docs into passages")
+    print("==> Splitting docs into passages")
     docs = docs.map(
         preprocessing.doc_to_passages,
         fn_kwargs={
             "passage_size": args.passage_size,
             "tokenization_method": args.tokenization_method,
+            "model": model,
             "prepend_title_to_passage": args.prepend_title_to_passage,
         },
     )
 
-    print("Initializing model")
-    # Initialize model to compute passage embeddings
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5").to(
-        device
-    )
-
-    print("Computing passage embeddings")
+    print("==> Computing passage embeddings")
     docs = docs.map(
         encoding.encode_passages,
         fn_kwargs={"encode_fn": model.encode},
         writer_batch_size=10000,
     )
 
-    print("Computing document embeddings")
-    docs = docs.map(
-        encoding.encode_doc,
-        fn_kwargs={
-            "method": "mean_passage_embeddings",
-        },
-        writer_batch_size=10000,
-    )
-
-    print("Saving dataset with doc and passage embeddings to disk")
-    dataset_dir = Path("./data/ms-marco/") / "+".join(
+    print("==> Saving dataset with passage embeddings to disk")
+    dataset_dir = Path("./data/ms-marco/passage-embeddings/") / "+".join(
         sorted([f"{k}={v}" for k, v in vars(args).items()])
     )
-    print(f"Dir:", dataset_dir)
+    print(f"== Dir:", dataset_dir)
     docs.save_to_disk(dataset_dir)
 
 
@@ -83,8 +74,13 @@ if __name__ == "__main__":
         help="Which shard to compute.",
     )
 
-    argparser.add_argument("--passage-size", type=int, default=400)
-    argparser.add_argument("--tokenization-method", type=str, default="spaces")
+    argparser.add_argument("--passage-size", type=int, default=512)
+    argparser.add_argument(
+        "--tokenization-method",
+        type=str,
+        choices=["model", "spaces"],
+        default="model",
+    )
     argparser.add_argument(
         "--prepend-title-to-passage", action="store_true", default=True
     )
