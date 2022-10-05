@@ -53,6 +53,8 @@ class MSMarcoDocs:
             ),
         )
 
+    # This is not actually necessary for evaluation as ir-measures works directly
+    # with TREC formatted .tsv files
     def get_relevance_scores(self) -> pd.DataFrame:
         scores = {
             "train": pd.read_csv(
@@ -69,3 +71,56 @@ class MSMarcoDocs:
         for k in scores:
             scores[k].query_id = scores[k].query_id.astype(str)
         return scores
+
+
+class TREC2019:
+    """Singleton to namespace methods related to TREC 2019 DL track.
+
+    Improvements would be to move hardcoded file paths to the arguments of an
+    __init__ method and use it as an object.
+    """
+
+    def get_queries(self) -> datasets.DatasetDict:
+        queries = datasets.load_dataset(
+            "csv",
+            data_files={
+                "test": "./data/trec/msmarco-test2019-queries.tsv",
+            },
+            name="trec2019-docs-queries",
+            encoding="utf8",
+            delimiter="\t",
+            column_names=["query_id", "text"],
+            features=datasets.Features(
+                {
+                    "query_id": datasets.Value("string"),
+                    "text": datasets.Value("string"),
+                }
+            ),
+        )
+        return queries
+
+class TREC2020:
+    """Singleton to namespace methods related to TREC 2020 DL track.
+
+    Improvements would be to move hardcoded file paths to the arguments of an
+    __init__ method and use it as an object.
+    """
+
+    def get_queries(self) -> datasets.DatasetDict:
+        queries = datasets.load_dataset(
+            "csv",
+            data_files={
+                "test": "./data/trec/msmarco-test2020-queries.tsv",
+            },
+            name="trec2019-docs-queries",
+            encoding="utf8",
+            delimiter="\t",
+            column_names=["query_id", "text"],
+            features=datasets.Features(
+                {
+                    "query_id": datasets.Value("string"),
+                    "text": datasets.Value("string"),
+                }
+            ),
+        )
+        return queries       
