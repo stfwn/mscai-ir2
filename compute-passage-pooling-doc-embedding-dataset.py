@@ -39,13 +39,13 @@ def encode_doc(doc: dict, method: Literal["mean", "sum", "first", "max"]) -> dic
         ]
     )
     if method == "mean":
-        doc["doc_embedding"] = passage_embeddings.mean(dim=0)
+        doc["doc_embedding"] = passage_embeddings.mean(dim=0).numpy()
     elif method == "sum":
-        doc["doc_embedding"] = passage_embeddings.sum(dim=0)
+        doc["doc_embedding"] = passage_embeddings.sum(dim=0).numpy()
     elif method == "max":
-        doc["doc_embedding"] = passage_embeddings.max(dim=0)[0]
+        doc["doc_embedding"] = passage_embeddings.max(dim=0)[0].numpy()
     elif method == "first":
-        doc["doc_embedding"] = passage_embeddings[0]
+        doc["doc_embedding"] = passage_embeddings[0].numpy()
     del doc["passages"]
     return doc
 
