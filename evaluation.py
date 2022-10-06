@@ -1,37 +1,141 @@
+from typing import Callable
+from argparse import ArgumentParser
+import os
+import json
+
+from datasets import Dataset
+from sentence_transformers import SentenceTransformer, util
+import torch
 import ir_measures
 from ir_measures import *
+
+import config
+from data import MSMarcoDocs, TREC2019, TREC2020
+import encoding
+import preprocessing
+
+METRICS = [RR, AP, P@1, P@5, P@20, P@100, R@100]
 
 """
 Evaluation
 ==================================================
 Input:
-	- Huggingface Dataset containing queries:
-		queries["ranking"] = [{"doc_id": [doc_ids], "scores": [scores]}]
-		queries["query_id"] = ["id_1, ..., id_n"]
-	- Relevance labels in TREC format
-		i.e. PATH to labels: "/data/ms-marco/msmarco-docdev-qrels.tsv"
-	- List of measures to calculate
-		default = [RR, AP, P@k, R@100] (k = [1, 5, 20, 50, 100])
+    - Path to .json file containing Hugginface Dataset
+    - Path to .faiss file containing FAISS index
 
 Output:
-	- Dict of format:
-		output = {measure: value}
+    - Dict of format:
+        output = {measure: value}
 
 """
 
-def input_to_run_format(queries):
-	result = {}
-	for i, q_id in enumerate(queries["query_id"]):
-		ranking = queries["ranking"][i]
-		tmp = dict(zip(ranking["doc_id"], ranking["scores"]))
-		result.update({q_id : tmp})
-	return result
+def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
+    scores, retrieved_docs = docs.get_nearest_examples(
+        "embedding", model.encode(query["text"]), k=config.ranking_size
+    )
+    query["ranking"] = dict(zip(retrieved_docs["doc_id"], [(1/score) for score in scores]))
+    return query
 
-def evaluate(
-	queries,
-	qrels_path="/data/ms-marco/msmarco-docdev-qrels.tsv",
-	metrics=[RR, AP, P@1, P@5, P@20, P@100, R@100]
-	):
-	run = input_to_run_format(queries)
-	qrels = ir_measures.read_trec_qrels(qrels_path)
-	return ir_measures.calc_aggregate(metrics, qrels, run)
+def to_trec(query_id: str, ranking: dict, name: str) -> str:
+    result = ""
+    for i, (doc_id, score) in enumerate(ranking.items()):
+        result += f"{query_id}\t0\t{doc_id}\t{i+1}\t{score}\t{name}\n"
+    return result
+
+def evaluate(run, qrels_path: str, metrics: list) -> dict:
+    if isinstance(run, str):
+        run = ir_measures.read_trec_run(run)
+    qrels = ir_measures.read_trec_qrels(qrels_path)
+    return ir_measures.calc_aggregate(metrics, qrels, run)
+
+def main(args):
+
+    # Load index
+    docs = Dataset.from_dict(json.load(open(args.dataset_file, 'r')))
+    docs.load_faiss_index("embedding", args.index_file)
+
+    # Load model
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5").to(device)
+    print(f"Using device: {model.device}")
+
+
+    # Initialize MS-MARCO
+    ms_marco_docs = MSMarcoDocs()
+
+    # Load queries (ds) and qrels (trec)
+    queries_msmarco = ms_marco_docs.get_queries()['dev']
+    qrels_msmarco = './data/ms-marco/msmarco-docdev-qrels.tsv'
+
+    # Encode queries (dict --> trec) and get rankings (dict)
+    name = args.dataset_file.split('.')[1].split('/')[-1] + "-ms-marco-ranking"
+    result = './data/ms-marco/'+name+'.tsv'
+    run_msmarco = {}
+    with open(result, 'w') as f:
+        for query in queries_msmarco:
+            ranking = rank(query, docs, model)['ranking']
+            run_msmarco.update({query['query_id'] : ranking})
+            f.write(to_trec(query['query_id'], ranking, name))
+
+    # Evaluate (either from dict or from TREC formatted file)
+    results_from_dict = evaluate(run_msmarco, qrels_msmarco, METRICS)
+    results_from_file = evaluate(result, qrels_msmarco, METRICS)
+    print(results_from_dict)
+    print(results_from_file)
+
+
+    # Initialize TREC 2019
+    trec19 = TREC2019()
+
+    # Load queries (ds) and qrels (trec)
+    queries_trec19 = trec19.get_queries()['test']
+    qrels_trec19 = './data/trec/2019qrels-docs.tsv'
+
+    # Encode queries (ds) and get rankings (dict)
+    name = args.dataset_file.split('.')[1].split('/')[-1] + "-trec19-ranking"
+    result = './data/trec/'+name+'.tsv'
+    run_trec19 = {}
+    with open(result, 'w') as f:
+        for query in queries_trec19:
+            ranking = rank(query, docs, model)['ranking']
+            run_trec19.update({query['query_id'] : ranking})
+            f.write(to_trec(query['query_id'], ranking, name))
+
+    # Evaluate (either from dict or from TREC formatted file)
+    results_from_dict = evaluate(run_trec19, qrels_trec19, METRICS)
+    results_from_file = evaluate(result, qrels_trec19, METRICS)
+    print(results_from_dict)
+    print(results_from_file)
+
+
+    # Initialize TREC 2020
+    trec20 = TREC2020()
+
+    # Load queries (ds) and qrels (trec)
+    queries_trec20 = trec20.get_queries()['test']
+    qrels_trec20 = './data/trec/2020qrels-docs.tsv'
+
+    # Encode queries (ds) and get rankings (dict)
+    name = args.dataset_file.split('.')[1].split('/')[-1] + "-trec20-ranking"
+    result = './data/trec/'+name+'.tsv'
+    run_trec20 = {}
+    with open(result, 'w') as f:
+        for query in queries_trec20:
+            ranking = rank(query, docs, model)['ranking']
+            run_trec19.update({query['query_id'] : ranking})
+            f.write(to_trec(query['query_id'], ranking, name))
+
+    # Evaluate (either from dict or from TREC formatted file)
+    results_from_dict = evaluate(run_trec20, qrels_trec20, METRICS)
+    results_from_file = evaluate(result, qrels_trec20, METRICS)
+    print(results_from_dict)
+    print(results_from_file)
+
+if __name__ == "__main__":
+    argparser = ArgumentParser()
+    argparser.add_argument("-d", "--dataset-file", type=str, help="Path to Huggingface Dataset (.json) of documents to rank.")
+    argparser.add_argument("-f", "--index-file", type=str, help="Path to FAISS index (.faiss) of documents to rank.")
+    args = argparser.parse_args()
+    main(args)
+
+
