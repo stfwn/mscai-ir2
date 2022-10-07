@@ -12,11 +12,11 @@ def encode_passages(doc: dict, encode_fn: Callable):
     Returns:
         doc dict with a 'passage_embedding' key-value pair in each doc['passages']
     """
-    passages = []
-    for i, passage in enumerate(doc["passages"]):
-        passage["passage_embedding"] = encode_fn(passage["passage_body"])
-        passages.append(passage)
-    doc["passages"] = passages
+    passage_bodies = [p["passage_body"] for p in doc["passages"]]
+    passage_embeddings = encode_fn(passage_bodies)
+    for i, passage_embedding in enumerate(passage_embeddings):
+        doc["passages"][i]["passage_embedding"] = passage_embedding
+        del doc["passages"][i]["passage_body"]
     return doc
 
 
