@@ -7,7 +7,7 @@ def doc_to_passages(
     doc: dict,
     model: SentenceTransformer,
     passage_size: int,
-    tokenization_method: Literal["spaces"],
+    tokenization_method: Literal["spaces", "model"],
     prepend_title_to_passage: bool,
 ):
     """Takes a doc dict with at least a 'body' key that contains its text and
@@ -38,11 +38,18 @@ def doc_to_passages(
         if prepend_title_to_passage:
             # Chop off [CLS] at the start and [SEP] at the end
             if doc["title"]:
-                title_input_ids = model.tokenizer(doc["title"])["input_ids"][1:-1]
+                MAX_TITLE_LEN = 50
+                title_input_ids = model.tokenizer(doc["title"])["input_ids"][1:-1][
+                    :MAX_TITLE_LEN
+                ]
             else:
                 title_input_ids = []
             # Take 20 margin
             passage_chunk_len = passage_size - len(title_input_ids) - 20
+            if passage_chunk_len <= 0:
+                raise ValueError(
+                    "No room for passage text in passage chunk len. Increase passage size arg."
+                )
             doc["passages"] = [
                 model.tokenizer.decode(
                     title_input_ids[1:-1] + body_input_ids[i : i + passage_chunk_len]
