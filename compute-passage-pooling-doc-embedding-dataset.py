@@ -18,17 +18,17 @@ def main(args):
     print("==> Computing doc encodings")
     ds = ds.map(encode_doc, fn_kwargs={"method": args.aggregation_method})
 
-    print("==> Computing FAISS index")
-    ds.add_faiss_index(column="doc_embedding")
-
     new_dataset_dir = "./data/ms-marco/doc-embeddings/" + "+".join(
         sorted([f"{k}={v}" for k, v in vars(args).items()])
     )
     print("==> Saving dataset to:", new_dataset_dir)
-    ds = datasets.save_to_disk(new_dataset_dir)
+    ds.save_to_disk(new_dataset_dir)
+
+    print("==> Computing FAISS index")
+    ds.add_faiss_index(column="doc_embedding")
 
     print("==> Saving FAISS index to the same folder")
-    ds.save_faiss_index("doc_embedding", new_dataset_dir + "doc-embedding-index.faiss")
+    ds.save_faiss_index("doc_embedding", new_dataset_dir + "/doc-embedding-index.faiss")
 
 
 def encode_doc(doc: dict, method: Literal["mean", "sum", "first", "max"]) -> dict:
