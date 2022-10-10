@@ -1,8 +1,9 @@
 import os
-
 import datasets
 import pandas as pd
 import psutil
+import random
+from sentence_transformers import InputExample
 
 # datasets.config.IN_MEMORY_MAX_SIZE = psutil.virtual_memory().available
 
@@ -123,4 +124,4 @@ class TREC2020:
                 }
             ),
         )
-        return queries       
+        return queries
