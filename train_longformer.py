@@ -1,6 +1,6 @@
 from venv import create
 from datasets import Dataset
-from sentence_transformers import SentenceTransformer, LoggingHandler, util, models, evaluation, losses, InputExample
+from sentence_transformers import SentenceTransformer, losses, InputExample
 from torch.utils.data import DataLoader
 import argparse
 from tqdm import tqdm
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", default='allenai/longformer-base-4096')
     parser.add_argument("--epochs", default=10, type=int)
     parser.add_argument("--warmup_steps", default=1000, type=int)
-    parser.add_argument("--lr", default=2e-5, type=float)
+    parser.add_argument("--lr", default=3e-5, type=float)
     parser.add_argument("--num_negs_per_system", default=5, type=int)
     parser.add_argument("--use_pre_trained_model", default=False, action="store_true")
     parser.add_argument("--use_all_queries", default=False, action="store_true")
@@ -139,8 +139,10 @@ if __name__ == "__main__":
 
     model = SentenceTransformer(args.model_name, device=args.device)
 
-    #TODO: check for good params for fine tuning
+    # See https://www.sbert.net/examples/training/ms_marco/README.html
     train_loss = losses.MultipleNegativesRankingLoss(model=model)
+    
+    #TODO: check for good params for fine tuning
     # Train the model
     model.fit(train_objectives=[(train_dataloader, train_loss)],
             epochs=args.epochs,
