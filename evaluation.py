@@ -14,7 +14,7 @@ from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
 
-METRICS = [RR, AP, P @ 1, P @ 5, P @ 20, P @ 100, R @ 100]
+METRICS = [nDCG, RR, AP, P @ 1, P @ 5, P @ 20, P @ 100, R @ 100]
 
 """
 Evaluation
@@ -34,13 +34,7 @@ def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     scores, retrieved_docs = docs.get_nearest_examples(
         "embedding", model.encode(query["text"]), k=config.ranking_size
     )
-<<<<<<< HEAD
     query["ranking"] = dict(zip(retrieved_docs["doc_id"], scores))
-=======
-    query["ranking"] = dict(
-        zip(retrieved_docs["doc_id"], [(1 / score) for score in scores])
-    )
->>>>>>> 082a1e1d3b9448f71ec79c157e1cf5aa628c0a7b
     return query
 
 
