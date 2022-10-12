@@ -74,7 +74,7 @@ def main(args):
     qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
 
     # Encode queries (dict --> trec) and get rankings (dict)
-    name = args.dataset_file.split("/")[-1] + "-ms-marco-ranking"
+    name = args.dataset_file.split("/")[3] + "-ms-marco-ranking"
     results = []
     # run_msmarco = {}
     for i, query in enumerate(queries_msmarco):
@@ -96,7 +96,7 @@ def main(args):
     # print(results_from_dict)
     print(results_from_file)
 
-    trec = False
+    trec = True
     if trec:
         # Initialize TREC 2019
         trec19 = TREC2019()
@@ -105,7 +105,7 @@ def main(args):
         qrels_trec19 = "./data/trec/2019qrels-docs.tsv"
 
         # Encode queries (ds) and get rankings (dict)
-        name = args.dataset_file.split("/")[-1] + "-trec19-ranking"
+        name = args.dataset_file.split("/")[3] + "-trec19-ranking"
         result = "./data/results/" + name + ".tsv"
         # run_trec19 = {}
         with open(result, "w") as f:
@@ -131,7 +131,7 @@ def main(args):
         qrels_trec20 = "./data/trec/2020qrels-docs.tsv"
 
         # Encode queries (ds) and get rankings (dict)
-        name = args.dataset_file.split('/')[-1] + "-trec20-ranking"
+        name = args.dataset_file.split('/')[3] + "-trec20-ranking"
         result = './data/results/'+name+'.tsv'
         # run_trec20 = {}
         with open(result, 'w') as f:
