@@ -1,3 +1,4 @@
+from doctest import DocTestSuite
 from venv import create
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, losses, InputExample
@@ -9,33 +10,40 @@ import config
 from data import MSMarcoDocs
 from transformers import LongformerTokenizerFast 
 from torch.utils.data.dataloader import default_collate
+import pandas as pd
+import numpy as np
+
 
 # Create a custom MSMARCO dataset that returns triplets (query, positive, negative)
-# on-the-fly based on the information from the mined-hard-negatives jsonl file.
 class MSMARCODatasetLongFormer(Dataset):
-    def __init__(self, queries, corpus):
-
+    def __init__(self, indexes, corpus, queries):
+        
+        self.indexes = indexes
         self.queries = queries
-        self.queries_ids = list(queries.keys())
+        # self.query_ids = list(self.indexes['query_id'].keys())
         self.corpus = corpus
+        # Neg_counter keeps track of which of the 50 negatives to use for all of the queries
+        self.neg_counter = {i: 1 for i in range(len(queries))}
 
     def __getitem__(self, item):
-        query = self.queries[self.queries_ids[item]]
-        query_text = query['query']
-
-        pos_id = query['pos'].pop(0)    #Pop positive and add at end
+        query_id = self.indexes['query_id'][item]
+        query_text = self.queries[query_id]
+       
+        pos_id = self.indexes['pos'][item]
         pos_text = self.corpus[pos_id]
-        query['pos'].append(pos_id)
 
-        neg_id = query['neg'].pop(0)    #Pop negative and add at end
+        # Use the counter to keep track of which negative we've had already
+        neg_iteration = f'neg_{self.neg_counter[item]}'
+        self.neg_counter[item] += 1 if self.neg_counter[item] < 50 else 0 # Reset after all 50 negatives are used
+        neg_id = self.indexes[neg_iteration][item]
         neg_text = self.corpus[neg_id]
-        query['neg'].append(neg_id)
+
         return InputExample(texts=[query_text, pos_text, neg_text])
 
     def __len__(self):
         return len(self.queries)
 
-def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True):
+def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_negs=50):
     #TODO: remove passages longer than max input length
     # Initialize MS Marco
     ms_marco_docs = MSMarcoDocs()
@@ -61,9 +69,12 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True):
             corresponding_docs.append(relevance_scores['dev'].loc[
                                                     relevance_scores['dev']['query_id'] == query['query_id']
                                                                     ]['doc_id'].values[0])
+        print(corresponding_docs)
+        
         print('Filtering docs')
         docs = docs.filter(lambda x: x['doc_id'] in corresponding_docs)
-
+        relevance_scores['train'] = relevance_scores['train'][relevance_scores['train']['doc_id'].apply(lambda x: x in corresponding_docs)]
+        relevance_scores['dev'] = relevance_scores['dev'][relevance_scores['dev']['doc_id'].apply(lambda x: x in corresponding_docs)]
     # Prepare docs, append title to body. Docs longer than max input lenght get truncated when passed to the model so
     # no need to check for that here. Docs_prepped = {doc_id: title + doc}
     print("Preparing docs")
@@ -82,37 +93,31 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True):
                 docs_prepped[doc_id] = doc['body']
         #TODO: Implement model tokenization. Faster during training and we probably won't
         # be updating the weights of the tokenizer anyway
-        
+
         else:
             raise NotImplementedError(f"Unknown tokenization_method: {tokenization_method}")
 
-    # Link the queries to documents. Queries are stored in a nested dict: {query_id: {query: [...], pos, [...], neg [...]}}
+    # Link the queries to documents. 
+    # Queries are stored in a dict: {query_id: [qid_1, qid_2, ... qid_n],
+    #                                           pos: [did_1, did_2, ... did_n]
+    #                                           neg_1: [did_1 ... did_n], neg_2: [did_1 ... did_n] ... neg_50: [did_1 ... did_n]
+    #                               }
     # The pos and neg keys contain doc_ids for relevant and irrelevant docs.
-    print("Preparing train queries")
-    queries_train = {}
-    for i, query in tqdm(enumerate(queries['train'])):
-        id = query['query_id']
-        relevant_doc_ids = relevance_scores['train'].loc[relevance_scores['train']['query_id'] == id]['doc_id']
-        neg_ids = set(docs_prepped.keys())
-        neg_ids = list(neg_ids - set(relevant_doc_ids))
-        # Sample 50 random docs as negatives
-        queries_train[id] = {'query': queries['train']['text'][i],
-                             'pos': list(relevant_doc_ids),
-                             'neg': random.choices(neg_ids, k=50)}
+    train_indexes = {"query_id": list(relevance_scores['train']['query_id']),
+        "pos": list(relevance_scores['train']['doc_id'])
+    }
+    dev_indexes = {"query_id": list(relevance_scores['dev']['query_id']),
+        "pos": list(relevance_scores['dev']['doc_id'])
+    }
 
-    print('Preparing dev queries')
-    queries_dev = {}
-    for i, query in tqdm(enumerate(queries['dev'])):
-        id = query['query_id']
-        relevant_doc_ids = relevance_scores['dev'].loc[relevance_scores['dev']['query_id'] == id]['doc_id']
-        neg_ids = set(docs_prepped.keys())
-        neg_ids = list(neg_ids - set(relevant_doc_ids))
-        # Sample 50 random docs as negatives
-        queries_train[id] = {'query': queries['dev']['text'][i],
-                             'pos': list(relevant_doc_ids),
-                             'neg': random.choices(neg_ids, k=50)}
+    for i in tqdm(range(1, num_negs+1)):
+        train_indexes[f'neg_{i}'] = list(np.roll(relevance_scores['train']['doc_id'], i))
+        dev_indexes[f'neg_{i}'] = list(np.roll(relevance_scores['dev']['doc_id'], i))
+    
+    queries_train = {row['query_id']: row['text'] for row in queries['train']}
+    queries_dev = {row['query_id']: row['text'] for row in queries['dev']}
 
-    return docs_prepped, queries_train, queries_dev
+    return docs_prepped, train_indexes, dev_indexes, queries_train, queries_dev
 
 if __name__ == "__main__":
 
@@ -129,10 +134,10 @@ if __name__ == "__main__":
     parser.add_argument("--device", default='cuda')
     args = parser.parse_args()
 
-    docs_prepped, queries_train, queries_dev = create_dataset()
+    docs_prepped, train_indexes, dev_indexes, train_queries, dev_queries = create_dataset()
     #TODO: send data to device?
 
-    train_dataset = MSMARCODatasetLongFormer(queries_train, docs_prepped)
+    train_dataset = MSMARCODatasetLongFormer(train_indexes, docs_prepped, train_queries)
 
     # For training the SentenceTransformer model, we need a dataset, a dataloader, and a loss used for training.
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=args.train_batch_size)
@@ -147,7 +152,7 @@ if __name__ == "__main__":
     model.fit(train_objectives=[(train_dataloader, train_loss)],
             epochs=args.epochs,
             warmup_steps=args.warmup_steps,
-            use_amp=True,
+            # use_amp=True,
             checkpoint_path=args.model_save_path,
             checkpoint_save_steps=len(train_dataloader),
             optimizer_params = {'lr': args.lr}
