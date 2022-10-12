@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from typing import Literal
 
 import datasets
+import faiss
 import torch
 
 
@@ -25,7 +26,10 @@ def main(args):
     ds.save_to_disk(new_dataset_dir)
 
     print("==> Computing FAISS index")
-    ds.add_faiss_index(column="doc_embedding")
+    ds.add_faiss_index(
+        column="doc_embedding",
+        metric_type=faiss.METRIC_INNER_PRODUCT,
+    )
 
     print("==> Saving FAISS index to the same folder")
     ds.save_faiss_index("doc_embedding", new_dataset_dir + "/doc-embedding-index.faiss")
