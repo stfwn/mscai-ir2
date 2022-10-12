@@ -6,8 +6,8 @@ import json
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
-import ir_measures
 from ir_measures import *
+import ir_measures
 
 import config
 from data import MSMarcoDocs, TREC2019, TREC2020
@@ -51,7 +51,8 @@ def evaluate(run, qrels_path: str, metrics: list) -> dict:
 def main(args):
 
     # Load index
-    docs = Dataset.from_dict(json.load(open(args.dataset_file, 'r')))
+    docs = Dataset.load_from_disk(args.dataset_file)
+    # docs = Dataset.from_dict(json.load(open(args.dataset_file, 'r')))
     docs.load_faiss_index("embedding", args.index_file)
 
     # Load model
@@ -68,72 +69,82 @@ def main(args):
     qrels_msmarco = './data/ms-marco/msmarco-docdev-qrels.tsv'
 
     # Encode queries (dict --> trec) and get rankings (dict)
-    name = args.dataset_file.split('.')[1].split('/')[-1] + "-ms-marco-ranking"
-    result = './data/ms-marco/'+name+'.tsv'
-    run_msmarco = {}
+    name = args.dataset_file.split('/')[-1] + "-ms-marco-ranking"
+    result = './data/results/'+name+'.tsv'
+    # run_msmarco = {}
     with open(result, 'w') as f:
-        for query in queries_msmarco:
+        for i, query in enumerate(queries_msmarco):
+            if i%100 == 0:
+                print(f"Done {i}/{len(queries_msmarco)} queries.")
             ranking = rank(query, docs, model)['ranking']
-            run_msmarco.update({query['query_id'] : ranking})
+            # run_msmarco.update({query['query_id'] : ranking})
             f.write(to_trec(query['query_id'], ranking, name))
 
     # Evaluate (either from dict or from TREC formatted file)
-    results_from_dict = evaluate(run_msmarco, qrels_msmarco, METRICS)
+    # results_from_dict = evaluate(run_msmarco, qrels_msmarco, METRICS)
     results_from_file = evaluate(result, qrels_msmarco, METRICS)
-    print(results_from_dict)
+    print(f"results from {args.dataset_file} on {qrels_msmarco}")
+    # print(results_from_dict)
     print(results_from_file)
 
+    trec = False
+    if trec:
+        # Initialize TREC 2019
+        trec19 = TREC2019()
 
-    # Initialize TREC 2019
-    trec19 = TREC2019()
+        # Load queries (ds) and qrels (trec)
+        queries_trec19 = trec19.get_queries()['test']
+        qrels_trec19 = './data/trec/2019qrels-docs.tsv'
 
-    # Load queries (ds) and qrels (trec)
-    queries_trec19 = trec19.get_queries()['test']
-    qrels_trec19 = './data/trec/2019qrels-docs.tsv'
+        # Encode queries (ds) and get rankings (dict)
+        name = args.dataset_file.split('/')[-1] + "-trec19-ranking"
+        result = './data/results/'+name+'.tsv'
+        # run_trec19 = {}
+        with open(result, 'w') as f:
+            for i, query in enumerate(queries_trec19):
+                if i%100 == 0:
+                    print(f"Done {i}/{len(queries_trec19)} queries.")
+                ranking = rank(query, docs, model)['ranking']
+                # run_trec19.update({query['query_id'] : ranking})
+                f.write(to_trec(query['query_id'], ranking, name))
 
-    # Encode queries (ds) and get rankings (dict)
-    name = args.dataset_file.split('.')[1].split('/')[-1] + "-trec19-ranking"
-    result = './data/trec/'+name+'.tsv'
-    run_trec19 = {}
-    with open(result, 'w') as f:
-        for query in queries_trec19:
-            ranking = rank(query, docs, model)['ranking']
-            run_trec19.update({query['query_id'] : ranking})
-            f.write(to_trec(query['query_id'], ranking, name))
-
-    # Evaluate (either from dict or from TREC formatted file)
-    results_from_dict = evaluate(run_trec19, qrels_trec19, METRICS)
-    results_from_file = evaluate(result, qrels_trec19, METRICS)
-    print(results_from_dict)
-    print(results_from_file)
+        # Evaluate (either from dict or from TREC formatted file)
+        # results_from_dict = evaluate(run_trec19, qrels_trec19, METRICS)
+        results_from_file = evaluate(result, qrels_trec19, METRICS)
+        # print(results_from_dict)
+        print(f"results from {args.dataset_file} on {qrels_trec19}")
+        print(results_from_file)
 
 
-    # Initialize TREC 2020
-    trec20 = TREC2020()
+        # Initialize TREC 2020
+        trec20 = TREC2020()
 
-    # Load queries (ds) and qrels (trec)
-    queries_trec20 = trec20.get_queries()['test']
-    qrels_trec20 = './data/trec/2020qrels-docs.tsv'
+        # Load queries (ds) and qrels (trec)
+        queries_trec20 = trec20.get_queries()['test']
+        qrels_trec20 = './data/trec/2020qrels-docs.tsv'
 
-    # Encode queries (ds) and get rankings (dict)
-    name = args.dataset_file.split('.')[1].split('/')[-1] + "-trec20-ranking"
-    result = './data/trec/'+name+'.tsv'
-    run_trec20 = {}
-    with open(result, 'w') as f:
-        for query in queries_trec20:
-            ranking = rank(query, docs, model)['ranking']
-            run_trec19.update({query['query_id'] : ranking})
-            f.write(to_trec(query['query_id'], ranking, name))
+        # Encode queries (ds) and get rankings (dict)
+        name = args.dataset_file.split('/')[-1] + "-trec20-ranking"
+        result = './data/results/'+name+'.tsv'
+        # run_trec20 = {}
+        with open(result, 'w') as f:
+            for i, query in enumerate(queries_trec20):
+                if i%100 == 0:
+                    print(f"Done {i}/{len(queries_trec20)} queries.")
+                ranking = rank(query, docs, model)['ranking']
+                # run_trec19.update({query['query_id'] : ranking})
+                f.write(to_trec(query['query_id'], ranking, name))
 
-    # Evaluate (either from dict or from TREC formatted file)
-    results_from_dict = evaluate(run_trec20, qrels_trec20, METRICS)
-    results_from_file = evaluate(result, qrels_trec20, METRICS)
-    print(results_from_dict)
-    print(results_from_file)
+        # Evaluate (either from dict or from TREC formatted file)
+        # results_from_dict = evaluate(run_trec20, qrels_trec20, METRICS)
+        results_from_file = evaluate(result, qrels_trec20, METRICS)
+        # print(results_from_dict)
+        print(f"results from {args.dataset_file} on {qrels_trec20}")
+        print(results_from_file)
 
 if __name__ == "__main__":
     argparser = ArgumentParser()
-    argparser.add_argument("-d", "--dataset-file", type=str, help="Path to Huggingface Dataset (.json) of documents to rank.")
+    argparser.add_argument("-d", "--dataset-file", type=str, help="Path to Huggingface Dataset (.arrow) of documents to rank.")
     argparser.add_argument("-f", "--index-file", type=str, help="Path to FAISS index (.faiss) of documents to rank.")
     args = argparser.parse_args()
     main(args)
