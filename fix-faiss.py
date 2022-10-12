@@ -19,6 +19,6 @@ for sub_dir in [
     print("Will save faiss index to", faiss_path)
     ds.add_faiss_index(
         column="doc_embedding",
-        metric_type=faiss.faiss.METRIC_INNER_PRODUCT,
+        metric_type=faiss.METRIC_INNER_PRODUCT,
     )
     ds.save_faiss_index("doc_embedding", ds_dir / "doc-embedding-index.faiss")
