@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_shared_course
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=evaluate-doc-embeddings
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=6
+#SBATCH --time=24:00:00
+#SBATCH --mem=32000M
+#SBATCH --output=slurm_output_%A.out
+
+module purge
+module load 2021
+module load Anaconda3/2021.05
+
+# Job starts in the directory where you call sbatch
+cd ~/mscai-ir2/
+
+# Activate environment
+source activate mscai-ir2
+
+# Run
+# aggregation_method: sum/mean/max/first
+# Uncomment one of the below variations
+# srun python3 \
+# 	-u evaluation.py \
+# 	-d data/ms-marco/doc-embeddings/aggregation_method=sum+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
+#     -f data/ms-marco/doc-embeddings/aggregation_method=sum+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss
+
+# srun python3 \
+# 	-u evaluation.py \
+# 	-d data/ms-marco/doc-embeddings/aggregation_method=mean+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
+#     -f data/ms-marco/doc-embeddings/aggregation_method=mean+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss
+
+srun python3 \
+	-u evaluation.py \
+ 	-d data/ms-marco/doc-embeddings/aggregation_method=max+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
+	-f data/ms-marco/doc-embeddings/aggregation_method=max+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss
+
+srun python3 \
+	-u evaluation.py \
+ 	-d data/ms-marco/doc-embeddings/aggregation_method=first+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
+	-f data/ms-marco/doc-embeddings/aggregation_method=first+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss

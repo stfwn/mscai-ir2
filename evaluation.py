@@ -66,7 +66,7 @@ def main(args):
     )
     print(f"Using device: {model.device}")
 
-    ms_marco = False
+    ms_marco = True
     if ms_marco:
         # Initialize MS-MARCO
         ms_marco_docs = MSMarcoDocs()
@@ -98,7 +98,7 @@ def main(args):
         # print(results_from_dict)
         print(results_from_file)
 
-    trec = True
+    trec = False
     if trec:
         # Initialize TREC 2019
         trec19 = TREC2019()
