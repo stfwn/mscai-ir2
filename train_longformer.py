@@ -42,7 +42,7 @@ class MSMARCODatasetLongFormer(Dataset):
         return InputExample(texts=[query_text, pos_text, neg_text])
 
     def __len__(self):
-        return len(self.queries)
+        return len(self.indexes)
 
 def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_negs=50):
     #TODO: remove passages longer than max input length
