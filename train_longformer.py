@@ -1,4 +1,5 @@
 from doctest import DocTestSuite
+from os import remove
 from venv import create
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, losses, InputExample
@@ -54,10 +55,10 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
     if config.stage == "DEV":
 
         queries["train"] = queries["train"].train_test_split(
-            train_size=10, test_size=1, shuffle=False
+            train_size=25, test_size=1, shuffle=False
         )["train"]
         queries["dev"] = queries["dev"].train_test_split(
-            train_size=10, test_size=1, shuffle=False
+            train_size=25, test_size=1, shuffle=False
         )["train"]
 
         corresponding_docs = []
@@ -70,15 +71,17 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
                                                     relevance_scores['dev']['query_id'] == query['query_id']
                                                                     ]['doc_id'].values[0])
         print(corresponding_docs)
-        
+
         print('Filtering docs')
         docs = docs.filter(lambda x: x['doc_id'] in corresponding_docs)
         relevance_scores['train'] = relevance_scores['train'][relevance_scores['train']['doc_id'].apply(lambda x: x in corresponding_docs)]
         relevance_scores['dev'] = relevance_scores['dev'][relevance_scores['dev']['doc_id'].apply(lambda x: x in corresponding_docs)]
+
     # Prepare docs, append title to body. Docs longer than max input lenght get truncated when passed to the model so
     # no need to check for that here. Docs_prepped = {doc_id: title + doc}
     print("Preparing docs")
     docs_prepped = {} 
+    remove_ids = []
     for doc in tqdm(docs):
 
         if tokenization_method == "spaces":
@@ -89,6 +92,11 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
                     docs_prepped[doc_id] = doc['title'] + doc['body'] if doc['title'] else doc['body']
                     if len(docs_prepped[doc_id]) > config.passage_size_longformer:
                         docs_prepped[doc_id] = docs_prepped[doc_id][:config.passage_size_longformer]
+                
+                # If doc has no body or title, remove the queries using that doc from the training data
+                # Store the doc ids to remove for now so we can remove all rows at once later
+                else:
+                    remove_ids.append(doc_id)
             else:
                 docs_prepped[doc_id] = doc['body']
         #TODO: Implement model tokenization. Faster during training and we probably won't
@@ -96,6 +104,10 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
 
         else:
             raise NotImplementedError(f"Unknown tokenization_method: {tokenization_method}")
+
+    # Remove docs without body or title
+    relevance_scores['train'] = relevance_scores['train'][~relevance_scores['train']['doc_id'].isin(remove_ids)]
+    relevance_scores['dev'] = relevance_scores['dev'][~relevance_scores['dev']['doc_id'].isin(remove_ids)]
 
     # Link the queries to documents. 
     # Queries are stored in a dict: {query_id: [qid_1, qid_2, ... qid_n],
@@ -152,7 +164,7 @@ if __name__ == "__main__":
     model.fit(train_objectives=[(train_dataloader, train_loss)],
             epochs=args.epochs,
             warmup_steps=args.warmup_steps,
-            # use_amp=True,
+            use_amp=True,
             checkpoint_path=args.model_save_path,
             checkpoint_save_steps=len(train_dataloader),
             optimizer_params = {'lr': args.lr}
