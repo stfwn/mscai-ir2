@@ -66,35 +66,37 @@ def main(args):
     )
     print(f"Using device: {model.device}")
 
-    # Initialize MS-MARCO
-    ms_marco_docs = MSMarcoDocs()
+    ms_marco = False
+    if ms_marco:
+        # Initialize MS-MARCO
+        ms_marco_docs = MSMarcoDocs()
 
-    # Load queries (ds) and qrels (trec)
-    queries_msmarco = ms_marco_docs.get_queries()["dev"]
-    qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
+        # Load queries (ds) and qrels (trec)
+        queries_msmarco = ms_marco_docs.get_queries()["dev"]
+        qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
 
-    # Encode queries (dict --> trec) and get rankings (dict)
-    name = args.dataset_file.split("/")[3] + "-ms-marco-ranking"
-    results = []
-    # run_msmarco = {}
-    for i, query in enumerate(queries_msmarco):
-        if i % 100 == 0:
-            print(f"Done {i}/{len(queries_msmarco)} queries.")
-        ranking = rank(query, docs, model)["ranking"]
-        results.append((query["query_id"], ranking, name))
-        # run_msmarco.update({query['query_id'] : ranking})
+        # Encode queries (dict --> trec) and get rankings (dict)
+        name = args.dataset_file.split("/")[3] + "-ms-marco-ranking"
+        results = []
+        # run_msmarco = {}
+        for i, query in enumerate(queries_msmarco):
+            if i % 100 == 0:
+                print(f"Done {i}/{len(queries_msmarco)} queries.")
+            ranking = rank(query, docs, model)["ranking"]
+            results.append((query["query_id"], ranking, name))
+            # run_msmarco.update({query['query_id'] : ranking})
 
-    result_file = "./data/results/" + name + ".tsv"
-    with open(result_file, "w") as f:
-        for query_id, ranking, name in results:
-            f.write(to_trec(query_id, ranking, name))
-            
-    # Evaluate (either from dict or from TREC formatted file)
-    # results_from_dict = evaluate(run_msmarco, qrels_msmarco, METRICS)
-    results_from_file = evaluate(result, qrels_msmarco, METRICS)
-    print(f"results from {args.dataset_file} on {qrels_msmarco}")
-    # print(results_from_dict)
-    print(results_from_file)
+        result_file = "./data/results/" + name + ".tsv"
+        with open(result_file, "w") as f:
+            for query_id, ranking, name in results:
+                f.write(to_trec(query_id, ranking, name))
+                
+        # Evaluate (either from dict or from TREC formatted file)
+        # results_from_dict = evaluate(run_msmarco, qrels_msmarco, METRICS)
+        results_from_file = evaluate(result_file, qrels_msmarco, METRICS)
+        print(f"results from {args.dataset_file} on {qrels_msmarco}")
+        # print(results_from_dict)
+        print(results_from_file)
 
     trec = True
     if trec:
