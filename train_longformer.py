@@ -45,9 +45,10 @@ class MSMARCODatasetLongFormer(Dataset):
         return len(self.indexes['query_id'])
 
 def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_negs=50, mode='save',
-                    data_dir='longformer/data'):
+                    data_dir='longformer/data', save_indicator=''):
 
     if mode == 'load':
+        data_dir += save_indicator
         with open(f'{data_dir}/docs_prepped.pkl', 'rb') as f:
             docs_prepped = pickle.load(f)
         with open(f'{data_dir}/train_queries.pkl', 'rb') as f:
@@ -144,7 +145,8 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
     train_queries = {row['query_id']: row['text'] for row in queries['train']}
     dev_queries = {row['query_id']: row['text'] for row in queries['dev']}
 
-    if mode == 'save':        
+    if mode == 'save':
+        data_dir += save_indicator
         print('Saving docs')
         os.makedirs(data_dir, exist_ok=True)
         with open(f'{data_dir}/docs_prepped.pkl', 'wb') as f:
@@ -173,11 +175,13 @@ if __name__ == "__main__":
     parser.add_argument("--model_save_path", default='longformer/')
     parser.add_argument("--mode", default='load')
     parser.add_argument("--data_dir", default='longformer/data')
+    parser.add_argument("--save_indicator", default='')
     parser.add_argument("--device", default='cuda')
     args = parser.parse_args()
 
     docs_prepped, train_indexes, dev_indexes, train_queries, dev_queries = create_dataset(mode=args.mode,
-                                                                                            data_dir=args.data_dir)
+                                                                                data_dir=args.data_dir, 
+                                                                                save_indicator=args.save_indicator)
     #TODO: send data to device?
 
     train_dataset = MSMARCODatasetLongFormer(train_indexes, docs_prepped, train_queries)
