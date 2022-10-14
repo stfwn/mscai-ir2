@@ -42,7 +42,7 @@ class MSMARCODatasetLongFormer(Dataset):
         return InputExample(texts=[query_text, pos_text, neg_text])
 
     def __len__(self):
-        return len(self.indexes)
+        return len(self.indexes['query_id'])
 
 def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_negs=50):
     #TODO: remove passages longer than max input length
@@ -153,12 +153,13 @@ if __name__ == "__main__":
 
     # For training the SentenceTransformer model, we need a dataset, a dataloader, and a loss used for training.
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=args.train_batch_size)
-
+    # print(len(train_dataloader))
+    # raise SystemExit(0)
     model = SentenceTransformer(args.model_name, device=args.device)
 
     # See https://www.sbert.net/examples/training/ms_marco/README.html
     train_loss = losses.MultipleNegativesRankingLoss(model=model)
-    
+
     #TODO: check for good params for fine tuning
     # Train the model
     model.fit(train_objectives=[(train_dataloader, train_loss)],
