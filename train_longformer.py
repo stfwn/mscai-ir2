@@ -1,5 +1,5 @@
 from doctest import DocTestSuite
-from os import remove
+import os
 from venv import create
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, losses, InputExample
@@ -13,7 +13,7 @@ from transformers import LongformerTokenizerFast
 from torch.utils.data.dataloader import default_collate
 import pandas as pd
 import numpy as np
-
+import pickle
 
 # Create a custom MSMARCO dataset that returns triplets (query, positive, negative)
 class MSMARCODatasetLongFormer(Dataset):
@@ -44,7 +44,22 @@ class MSMARCODatasetLongFormer(Dataset):
     def __len__(self):
         return len(self.indexes['query_id'])
 
-def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_negs=50):
+def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_negs=50, mode='save',
+                    data_dir='longformer/data'):
+
+    if mode == 'load':
+        with open(f'{data_dir}/docs_prepped.pkl', 'rb') as f:
+            docs_prepped = pickle.load(f)
+        with open(f'{data_dir}/train_queries.pkl', 'rb') as f:
+            train_queries = pickle.load(f)
+        with open(f'{data_dir}/dev_queries.pkl', 'rb') as f:
+            dev_queries = pickle.load(f)
+        with open(f'{data_dir}/train_indexes.pkl', 'rb') as f:
+            train_indexes = pickle.load(f)
+        with open(f'{data_dir}/dev_indexes.pkl', 'rb') as f:
+            dev_indexes = pickle.load(f)
+        return docs_prepped, train_indexes, dev_indexes, train_queries, dev_queries
+    
     #TODO: remove passages longer than max input length
     # Initialize MS Marco
     ms_marco_docs = MSMarcoDocs()
@@ -70,13 +85,13 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
             corresponding_docs.append(relevance_scores['dev'].loc[
                                                     relevance_scores['dev']['query_id'] == query['query_id']
                                                                     ]['doc_id'].values[0])
-        print(corresponding_docs)
 
         print('Filtering docs')
         docs = docs.filter(lambda x: x['doc_id'] in corresponding_docs)
         relevance_scores['train'] = relevance_scores['train'][relevance_scores['train']['doc_id'].apply(lambda x: x in corresponding_docs)]
         relevance_scores['dev'] = relevance_scores['dev'][relevance_scores['dev']['doc_id'].apply(lambda x: x in corresponding_docs)]
 
+    
     # Prepare docs, append title to body. Docs longer than max input lenght get truncated when passed to the model so
     # no need to check for that here. Docs_prepped = {doc_id: title + doc}
     print("Preparing docs")
@@ -126,10 +141,23 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
         train_indexes[f'neg_{i}'] = list(np.roll(relevance_scores['train']['doc_id'], i))
         dev_indexes[f'neg_{i}'] = list(np.roll(relevance_scores['dev']['doc_id'], i))
     
-    queries_train = {row['query_id']: row['text'] for row in queries['train']}
-    queries_dev = {row['query_id']: row['text'] for row in queries['dev']}
+    train_queries = {row['query_id']: row['text'] for row in queries['train']}
+    dev_queries = {row['query_id']: row['text'] for row in queries['dev']}
 
-    return docs_prepped, train_indexes, dev_indexes, queries_train, queries_dev
+    if mode == 'save':        
+        print('Saving docs')
+        os.makedirs(data_dir, exist_ok=True)
+        with open(f'{data_dir}/docs_prepped.pkl', 'wb') as f:
+            pickle.dump(docs_prepped, f)
+        with open(f'{data_dir}/train_queries.pkl', 'wb') as f:
+            pickle.dump(train_queries, f)
+        with open(f'{data_dir}/dev_queries.pkl', 'wb') as f:
+            pickle.dump(dev_queries, f)
+        with open(f'{data_dir}/train_indexes.pkl', 'wb') as f:
+            pickle.dump(train_indexes, f)
+        with open(f'{data_dir}/dev_indexes.pkl', 'wb') as f:
+            pickle.dump(dev_indexes, f)
+    return docs_prepped, train_indexes, dev_indexes, train_queries, dev_queries
 
 if __name__ == "__main__":
 
@@ -143,18 +171,19 @@ if __name__ == "__main__":
     parser.add_argument("--use_pre_trained_model", default=False, action="store_true")
     parser.add_argument("--use_all_queries", default=False, action="store_true")
     parser.add_argument("--model_save_path", default='longformer/')
+    parser.add_argument("--mode", default='load')
+    parser.add_argument("--data_dir", default='longformer/data')
     parser.add_argument("--device", default='cuda')
     args = parser.parse_args()
 
-    docs_prepped, train_indexes, dev_indexes, train_queries, dev_queries = create_dataset()
+    docs_prepped, train_indexes, dev_indexes, train_queries, dev_queries = create_dataset(mode=args.mode,
+                                                                                            data_dir=args.data_dir)
     #TODO: send data to device?
 
     train_dataset = MSMARCODatasetLongFormer(train_indexes, docs_prepped, train_queries)
 
     # For training the SentenceTransformer model, we need a dataset, a dataloader, and a loss used for training.
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=args.train_batch_size)
-    # print(len(train_dataloader))
-    # raise SystemExit(0)
     model = SentenceTransformer(args.model_name, device=args.device)
 
     # See https://www.sbert.net/examples/training/ms_marco/README.html
