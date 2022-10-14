@@ -194,9 +194,9 @@ if __name__ == "__main__":
     model = SentenceTransformer(args.model_name, device=args.device)
 
     # See https://www.sbert.net/examples/training/ms_marco/README.html
-    # train_loss = losses.MultipleNegativesRankingLoss(model=model)
+    train_loss = losses.MultipleNegativesRankingLoss(model=model)
     # https://huggingface.co/blog/how-to-train-sentence-transformers
-    train_loss = losses.TripletLoss(model=model)
+    # train_loss = losses.TripletLoss(model=model)
 
     # Train the model
     model.fit(train_objectives=[(train_dataloader, train_loss)],
