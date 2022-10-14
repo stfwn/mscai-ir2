@@ -206,7 +206,8 @@ if __name__ == "__main__":
             scheduler='warmupconstant',                             # linear warmup schedule
             warmup_steps=int(0.2*len(train_dataset)),               # number of warmup steps for learning rate scheduler
             weight_decay=10**-7,                                    # strength of weight decay
-            output_path=f'{args.model_save_path}/train_output_{args.save_indicator}',     # Save training output   
+            output_path=f'{args.model_save_path}/train_output_{args.save_indicator}',     # Save training output
+            save_best_model=True, 
             checkpoint_path=f'{args.model_save_path}/checkpoints_{args.save_indicator}',  # Folder to save checkpoints during training
             checkpoint_save_steps=int(0.2*len(train_dataset)),      # Will save a checkpoint after so many steps 
     )
