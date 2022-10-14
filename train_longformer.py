@@ -3,13 +3,14 @@ import os
 from venv import create
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, losses, InputExample
+from sentence_transformers.evaluation import InformationRetrievalEvaluator
 from torch.utils.data import DataLoader
 import argparse
 from tqdm import tqdm
 import random
 import config
 from data import MSMarcoDocs
-from transformers import LongformerTokenizerFast 
+from transformers import TrainingArguments, Trainer
 from torch.utils.data.dataloader import default_collate
 import pandas as pd
 import numpy as np
@@ -164,14 +165,9 @@ def create_dataset(tokenization_method='spaces', prepend_title_to_doc=True, num_
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--train_batch_size", default=64, type=int)
+    parser.add_argument("--train_batch_size", default=32, type=int)
     parser.add_argument("--model_name", default='allenai/longformer-base-4096')
-    parser.add_argument("--epochs", default=10, type=int)
-    parser.add_argument("--warmup_steps", default=1000, type=int)
-    parser.add_argument("--lr", default=3e-5, type=float)
-    parser.add_argument("--num_negs_per_system", default=5, type=int)
-    parser.add_argument("--use_pre_trained_model", default=False, action="store_true")
-    parser.add_argument("--use_all_queries", default=False, action="store_true")
+    parser.add_argument("--epochs", default=3, type=int)
     parser.add_argument("--model_save_path", default='longformer/')
     parser.add_argument("--mode", default='load')
     parser.add_argument("--data_dir", default='longformer/data')
@@ -185,24 +181,32 @@ if __name__ == "__main__":
     #TODO: send data to device?
 
     train_dataset = MSMARCODatasetLongFormer(train_indexes, docs_prepped, train_queries)
+    eval_dataset = MSMARCODatasetLongFormer(dev_indexes, docs_prepped, dev_queries)
+
+    # Set up evaluation function
+    relevant_docs_dev = {dev_indexes['query_id'][item]: dev_indexes['pos'][item] for item in range(len(dev_indexes['query_id']))}
+    evaluation_function = InformationRetrievalEvaluator(queries=dev_queries, corpus=docs_prepped,
+                                                        relevant_docs=relevant_docs_dev, mrr_at_k=[10, 100],
+                                                        name=args.save_indicator)
 
     # For training the SentenceTransformer model, we need a dataset, a dataloader, and a loss used for training.
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=args.train_batch_size)
     model = SentenceTransformer(args.model_name, device=args.device)
 
     # See https://www.sbert.net/examples/training/ms_marco/README.html
-    train_loss = losses.MultipleNegativesRankingLoss(model=model)
+    # train_loss = losses.MultipleNegativesRankingLoss(model=model)
+    # https://huggingface.co/blog/how-to-train-sentence-transformers
+    train_loss = losses.TripletLoss(model=model)
 
-    #TODO: check for good params for fine tuning
     # Train the model
     model.fit(train_objectives=[(train_dataloader, train_loss)],
-            epochs=args.epochs,
-            warmup_steps=args.warmup_steps,
+            evaluator=evaluation_function,
+            epochs=3,
             use_amp=True,
-            checkpoint_path=args.model_save_path,
-            checkpoint_save_steps=len(train_dataloader),
-            optimizer_params = {'lr': args.lr}
-            )
-
-    # Save the model
-    model.save(args.model_save_path)
+            scheduler='warmupconstant',                             # linear warmup schedule
+            warmup_steps=int(0.2*len(train_dataset)),               # number of warmup steps for learning rate scheduler
+            weight_decay=10**-7,                                    # strength of weight decay
+            output_path=f'{args.model_save_path}/train_output_{args.save_indicator}',     # Save training output   
+            checkpoint_path=f'{args.model_save_path}/checkpoints_{args.save_indicator}',  # Folder to save checkpoints during training
+            checkpoint_save_steps=int(0.2*len(train_dataset)),      # Will save a checkpoint after so many steps 
+    )
