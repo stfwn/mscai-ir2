@@ -7,6 +7,10 @@ from torch.nn import Module, TransformerEncoder, TransformerEncoderLayer
 class PassageTransformer(Module):
     def __init__(self, d_model=768, dim_feedforward=1024, nhead=8, num_layers=1):
         super().__init__()
+        self.d_model = d_model
+        self.dim_feedforward = dim_feedforward
+        self.nhead = nhead
+        self.num_layers = 1
         encoder_layer = TransformerEncoderLayer(
             d_model=d_model,
             nhead=nhead,
@@ -17,11 +21,13 @@ class PassageTransformer(Module):
         )
         self.transformer = TransformerEncoder(encoder_layer, num_layers=num_layers)
 
-    def forward(self, src, mask=None):
+    def forward(self, src, mask=None, src_key_padding_mask=None):
         """
         Args:
             x: (batch, seq, feature)"""
-        return self.transformer(src, mask=mask).mean(dim=1)
+        return self.transformer(
+            src, mask=mask, src_key_padding_mask=src_key_padding_mask
+        ).mean(dim=1)
 
     def encode_doc(self, doc: dict):
         """
@@ -50,5 +56,5 @@ class PassageTransformer(Module):
                 for passages in docs["passages"]
             ]
         ).to_padded_tensor(padding=0.0)
-        attn_mask = all_passage_embeddings[:, :, 0] != 0.0
-        return self(all_passage_embeddings, attn_mask)
+        padding_mask = (all_passage_embeddings == 0.0).sum(-1) == self.d_model
+        return self(all_passage_embeddings, src_key_padding_mask=padding_mask)
