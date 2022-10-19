@@ -10,4 +10,4 @@ prepend_title_to_passage = True
 # True to disable caching to a file
 keep_in_memory = True if stage == "DEV" else False
 
-ranking_size = 10000
+ranking_size = 1000

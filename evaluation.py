@@ -14,7 +14,7 @@ from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
 
-METRICS = [nDCG, RR, AP, P @ 1, P @ 5, P @ 20, P @ 100, R @ 100]
+METRICS = [RR@10, nDCG@10, R@1000, nDCG, RR, AP, P @ 1, P @ 5, P @ 20, P @ 100, R @ 100]
 
 """
 Evaluation
@@ -72,7 +72,8 @@ def main(args):
         ms_marco_docs = MSMarcoDocs()
 
         # Load queries (ds) and qrels (trec)
-        queries_msmarco = ms_marco_docs.get_queries()["dev"]
+        # queries_msmarco = ms_marco_docs.get_queries()["dev"]
+        queries_msmarco = Dataset.load_from_disk('./data/ms-marco/query-embeddings/dev/')
         qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
 
         # Encode queries (dict --> trec) and get rankings (dict)
@@ -82,7 +83,8 @@ def main(args):
         for i, query in enumerate(queries_msmarco):
             if i % 100 == 0:
                 print(f"Done {i}/{len(queries_msmarco)} queries.")
-            ranking = rank(query, docs, model)["ranking"]
+            scores, retrieved_docs = docs.get_nearest_examples("embedding", query["embedding"], k=config.ranking_size)
+            ranking = dict(zip(retrieved_docs["doc_id"], scores))
             results.append((query["query_id"], ranking, name))
             # run_msmarco.update({query['query_id'] : ranking})
 
@@ -98,7 +100,7 @@ def main(args):
         # print(results_from_dict)
         print(results_from_file)
 
-    trec = False
+    trec = True
     if trec:
         # Initialize TREC 2019
         trec19 = TREC2019()

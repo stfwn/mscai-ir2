@@ -2,7 +2,7 @@
 
 #SBATCH --partition=gpu_shared_course
 #SBATCH --gres=gpu:1
-#SBATCH --job-name=evaluate-doc-embeddings
+#SBATCH --job-name=score-aggregation
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
 #SBATCH --time=4:00:00

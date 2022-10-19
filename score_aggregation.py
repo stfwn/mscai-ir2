@@ -18,7 +18,7 @@ import gc
 
 def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     scores, retrieved_docs = docs.get_nearest_examples(
-        "embedding", model.encode(query["text"]), k=config.ranking_size
+        "embedding", model.encode(query["text"]), k=1000
     )
     query["ranking"] = dict(zip(retrieved_docs["doc_id"], scores))
     return query

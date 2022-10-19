@@ -22,15 +22,15 @@ source activate mscai-ir2
 # Run
 # aggregation_method: sum/mean/max/first
 # Uncomment one of the below variations
-# srun python3 \
-# 	-u evaluation.py \
-# 	-d data/ms-marco/doc-embeddings/aggregation_method=sum+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
-#     -f data/ms-marco/doc-embeddings/aggregation_method=sum+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss
+srun python3 \
+	-u evaluation.py \
+	-d data/ms-marco/doc-embeddings/aggregation_method=sum+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
+    -f data/ms-marco/doc-embeddings/aggregation_method=sum+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss
 
-# srun python3 \
-# 	-u evaluation.py \
-# 	-d data/ms-marco/doc-embeddings/aggregation_method=mean+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
-#     -f data/ms-marco/doc-embeddings/aggregation_method=mean+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss
+srun python3 \
+	-u evaluation.py \
+	-d data/ms-marco/doc-embeddings/aggregation_method=mean+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/ \
+    -f data/ms-marco/doc-embeddings/aggregation_method=mean+passage_size=512+prepend_title_to_passage=True+tokenization_method=model/doc-embedding-index.faiss
 
 srun python3 \
 	-u evaluation.py \
