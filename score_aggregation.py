@@ -46,7 +46,7 @@ def main():
         }
         a = time.time()
         for i, doc in enumerate(docs):
-            if i % 10000 == 0:
+            if i % 100 == 0:
                 b = time.time()
                 print(f"Flattening doc {i} out of {len(docs)}; time {b-a}")
             for passage in doc['passages']:
