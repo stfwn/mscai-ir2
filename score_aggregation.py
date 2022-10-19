@@ -44,9 +44,11 @@ def main():
 
 	# load data
     passages = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')
+    print(passages)
+    print(passages['passages'])
 	# build faiss index
-    passages.add_faiss_index(column="embedding")
-    passages.save_faiss_index("embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+    # passages.add_faiss_index(column="embedding")
+    # passages.save_faiss_index("embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
 
     # # Load queries (ds) and qrels (trec)
     # ms_marco_docs = MSMarcoDocs()
