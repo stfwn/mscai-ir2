@@ -45,6 +45,8 @@ def main():
             'passage_embedding': []
         }
         for doc in docs:
+            print(doc)
+            print(doc['passages'])
             for i, p_id in enumerate(doc['passages']['passage_id']):
                 ps_data['passage_id'].append(p_id)
                 ps_data['passage_embedding'].append(doc['passages']['passage_embedding'][i])
