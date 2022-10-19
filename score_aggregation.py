@@ -44,7 +44,11 @@ def main():
             'passage_id': [],
             'passage_embedding': []
         }
-        for doc in docs:
+        a = time.time()
+        for i, doc in enumerate(docs):
+            if i % 100 == 0:
+                b = time.time()
+                print(f"Flattening doc {i} out of {len(docs)}; time {b-a}")
             for passage in doc['passages']:
                 ps_data['passage_id'].append(passage['passage_id'])
                 ps_data['passage_embedding'].append(passage['passage_embedding'])
