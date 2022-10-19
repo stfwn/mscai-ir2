@@ -44,7 +44,7 @@ def main():
 
 	# load data
     docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')
-    print(docs[0])
+    print(docs[0]['passages'][0].keys())
  #    passages = docs['passages']
 	# # build faiss index
  #    try:
