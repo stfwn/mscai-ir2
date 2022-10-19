@@ -18,7 +18,7 @@ import gc
 
 def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     scores, retrieved_docs = docs.get_nearest_examples(
-        "embedding", model.encode(query["text"]), k=1000
+        "embedding", model.encode(query["text"]), k=config.ranking_size
     )
     query["ranking"] = dict(zip(retrieved_docs["doc_id"], scores))
     return query
@@ -41,7 +41,7 @@ def main():
         passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
     except:
         print("===>STARTING SHARTING")
-        num_shards = 10
+        num_shards = 30
         for k in range(num_shards):
             # load only shard
             docs = Dataset.from_dict(
