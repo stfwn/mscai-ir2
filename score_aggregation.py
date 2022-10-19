@@ -34,29 +34,29 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5").to(device)
 
-    # load data
-    try:
-        passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
-    except:
-        docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')    
-        # flatten data
-        ps_data = {
-            'passage_id': [],
-            'passage_embedding': []
-        }
-        a = time.time()
-        for i, doc in enumerate(docs):
-            if i % 100 == 0:
-                b = time.time()
-                print(f"Flattening doc {i} out of {len(docs)}; time {b-a}")
-            for passage in doc['passages']:
-                ps_data['passage_id'].append(passage['passage_id'])
-                ps_data['passage_embedding'].append(passage['passage_embedding'])
+    # # load data
+    # try:
+    #     passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
+    # except:
+    #     docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')    
+    #     # flatten data
+    #     ps_data = {
+    #         'passage_id': [],
+    #         'passage_embedding': []
+    #     }
+    #     a = time.time()
+    #     for i, doc in enumerate(docs):
+    #         if i % 100 == 0:
+    #             b = time.time()
+    #             print(f"Flattening doc {i} out of {len(docs)}; time {b-a}")
+    #         for passage in doc['passages']:
+    #             ps_data['passage_id'].append(passage['passage_id'])
+    #             ps_data['passage_embedding'].append(passage['passage_embedding'])
 
-        passages = Dataset.from_dict(ps_data)
-        passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
-        print('Saved flattened passage dataset to disk')
-
+    #     passages = Dataset.from_dict(ps_data)
+    #     passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
+    #     print('Saved flattened passage dataset to disk')
+    passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')
     # build faiss index
     try:
         passages.load_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
