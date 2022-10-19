@@ -30,34 +30,34 @@ def to_trec(query_id: str, ranking: dict, name: str) -> str:
 
 def main():
 
-	# Load model
-	device = "cuda" if torch.cuda.is_available() else "cpu"
-	model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5").to(device)
+    # Load model
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = SentenceTransformer("sentence-transformers/msmarco-distilbert-dot-v5").to(device)
 
-	# load data
-	try:
-		passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
-	except:
-	    docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')    
-	    # flatten data
-	    ps_data = {
-	    	'passage_id': [],
-	    	'passage_embedding': []
-	    }
-	    for doc in docs:
-			for i, p_id in enumerate(doc['passages']['passage_id']):
-				ps_data['passage_id'].append(p_id)
-				ps_data['passage_embedding'].append(doc['passages']['passage_embedding'][i])
-
-		passages = Dataset.from_dict(ps_data)
-		passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
-
-	# build faiss index
+    # load data
     try:
-    	passages.load_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+        passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
     except:
-	    passages.add_faiss_index(column="passage_embedding")
-	    passages.save_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+        docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')    
+        # flatten data
+        ps_data = {
+            'passage_id': [],
+            'passage_embedding': []
+        }
+        for doc in docs:
+            for i, p_id in enumerate(doc['passages']['passage_id']):
+                ps_data['passage_id'].append(p_id)
+                ps_data['passage_embedding'].append(doc['passages']['passage_embedding'][i])
+
+        passages = Dataset.from_dict(ps_data)
+        passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
+
+    # build faiss index
+    try:
+        passages.load_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+    except:
+        passages.add_faiss_index(column="passage_embedding")
+        passages.save_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
 
  #    # # Load queries (ds) and qrels (trec)
  #    # ms_marco_docs = MSMarcoDocs()
@@ -76,19 +76,19 @@ def main():
     results_sum = []
     a = time.time()
     for i, query in enumerate(queries_trec19):
-    	b = time.time()
+        b = time.time()
         print(f"Done {i}/{len(queries_trec19)} queries in {b-a} sec")
         ranking = rank(query, docs, model)["ranking"]
         # Rerank
-		scores = {}
-		for p_id in ranking.keys():
-			d_id = p_id.split('_')[0]
-			i = ds['doc_id'].index(d_id)
-			doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in ds['passages'][i]['passage_embedding']])
-			scores.update({d_id: (doc_scores.sum(), doc_scores.mean())})
+        scores = {}
+        for p_id in ranking.keys():
+            d_id = p_id.split('_')[0]
+            i = ds['doc_id'].index(d_id)
+            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in ds['passages'][i]['passage_embedding']])
+            scores.update({d_id: (doc_scores.sum(), doc_scores.mean())})
 
-		rerank_sum = {k: v[0] for k, v in sorted(scores.items(), key=lambda item: item[1][0], reverse=True)}
-		rerank_mean = {k: v[1] for k, v in sorted(scores.items(), key=lambda item: item[1][1], reverse=True)}
+        rerank_sum = {k: v[0] for k, v in sorted(scores.items(), key=lambda item: item[1][0], reverse=True)}
+        rerank_mean = {k: v[1] for k, v in sorted(scores.items(), key=lambda item: item[1][1], reverse=True)}
 
         results_max.append((query["query_id"], ranking, name+'max'))
         results_mean.append((query["query_id"], rerank_mean, name+'mean'))
@@ -112,7 +112,7 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+    main()
 
 
 
