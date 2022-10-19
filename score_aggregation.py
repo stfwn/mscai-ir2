@@ -45,14 +45,13 @@ def main():
             'passage_embedding': []
         }
         for doc in docs:
-            print(doc)
-            print(doc['passages'])
-            for i, p_id in enumerate(doc['passages']['passage_id']):
-                ps_data['passage_id'].append(p_id)
-                ps_data['passage_embedding'].append(doc['passages']['passage_embedding'][i])
+            for passage in doc['passages']:
+                ps_data['passage_id'].append(passage['passage_id'])
+                ps_data['passage_embedding'].append(passage['passage_embedding'])
 
         passages = Dataset.from_dict(ps_data)
         passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
+        print('Saved flattened passage dataset to disk')
 
     # build faiss index
     try:
@@ -60,6 +59,7 @@ def main():
     except:
         passages.add_faiss_index(column="passage_embedding")
         passages.save_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+        print('Saved faiss index to disk')
 
  #    # # Load queries (ds) and qrels (trec)
  #    # ms_marco_docs = MSMarcoDocs()
