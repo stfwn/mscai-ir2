@@ -40,6 +40,7 @@ def main():
     try:
         passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
     except:
+        print("===>STARTING SHARTING")
         num_shards = 10
         for k in range(num_shards):
             # load only shard
