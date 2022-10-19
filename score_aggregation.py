@@ -85,3 +85,6 @@ def main():
 	# rank Sum
 
 	# evaluate
+
+if __name__ == "__main__":
+	main()
