@@ -13,6 +13,8 @@ from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
 
+import gc
+
 
 def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     scores, retrieved_docs = docs.get_nearest_examples(
@@ -38,25 +40,37 @@ def main():
     try:
         passages = load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
     except:
-        docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')    
-        # flatten data
-        ps_data = {
-            'passage_id': [],
-            'passage_embedding': []
-        }
-        a = time.time()
-        for i, doc in enumerate(docs):
-            if i % 100 == 0:
-                b = time.time()
-                print(f"Flattening doc {i} out of {len(docs)}; time {b-a}")
-            for passage in doc['passages']:
-                ps_data['passage_id'].append(passage['passage_id'])
-                ps_data['passage_embedding'].append(passage['passage_embedding'])
+        num_shards = 10
+        for k in range(num_shards):
+            # load only shard
+            docs = Dataset.from_dict(
+                    Dataset.load_from_disk(
+                        './data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/'
+                    )[int((k/num_shards)*3201821):int((k+1/num_shards)*3201821)]
+                )
+            # flatten data
+            ps_data = {
+                'passage_id': [],
+                'passage_embedding': []
+            }
+            a = time.time()
+            for i, doc in enumerate(docs):
+                if i % 100 == 0:
+                    b = time.time()
+                    print(f"Flattening doc {i} out of {len(docs)}; time {b-a}")
+                for passage in doc['passages']:
+                    ps_data['passage_id'].append(passage['passage_id'])
+                    ps_data['passage_embedding'].append(passage['passage_embedding'])
 
-        passages = Dataset.from_dict(ps_data)
-        passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
-        print('Saved flattened passage dataset to disk')
-    
+            passages = Dataset.from_dict(ps_data)
+            passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened_{}/'.format(k))
+            print('Saved flattened passage dataset to disk')
+
+            del docs
+            del ps_data
+            del passages
+            gc.collect()
+
     # build faiss index
     try:
         passages.load_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
