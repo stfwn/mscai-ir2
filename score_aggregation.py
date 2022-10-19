@@ -44,48 +44,38 @@ def main():
 
 	# load data
     docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')
-    passages = docs['passages']
-	# build faiss index
-    passages.add_faiss_index(column="embedding")
-    passages.save_faiss_index("embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+    print(docs[0])
+ #    passages = docs['passages']
+	# # build faiss index
+ #    try:
+ #    	passages.load_faiss_index("embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+ #    except:
+	#     passages.add_faiss_index(column="embedding")
+	#     passages.save_faiss_index("embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
 
-    # # Load queries (ds) and qrels (trec)
-    # ms_marco_docs = MSMarcoDocs()
-    # # queries_msmarco = ms_marco_docs.get_queries()["dev"]
-    # queries_msmarco = Dataset.load_from_disk('./data/ms-marco/query-embeddings/dev/')
-    # qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
+ #    # # Load queries (ds) and qrels (trec)
+ #    # ms_marco_docs = MSMarcoDocs()
+ #    # # queries_msmarco = ms_marco_docs.get_queries()["dev"]
+ #    # queries_msmarco = Dataset.load_from_disk('./data/ms-marco/query-embeddings/dev/')
+ #    # qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
 
-    # Load queries and qrels
-    # trec19 = TREC2019()
-    # queries_trec19 = trec19.get_queries()["test"]
-    # qrels_trec19 = "./data/trec/2019qrels-docs.tsv"
-    # # Rank
-    # name = args.dataset_file.split("/")[3] + "-trec19-ranking"
-    # result = "./data/results/" + name + ".tsv"
-    # with open(result, "w") as f:
-    #     for i, query in enumerate(queries_trec19):
-    #         if i % 100 == 0:
-    #             print(f"Done {i}/{len(queries_trec19)} queries.")
-    #         ranking = rank(query, docs, model)["ranking"]
-    #         f.write(to_trec(query["query_id"], ranking, name))
+ #    # Load queries and qrels
+ #    trec19 = TREC2019()
+ #    queries_trec19 = trec19.get_queries()["test"]
+ #    qrels_trec19 = "./data/trec/2019qrels-docs.tsv"
+ #    # Rank
+ #    name = args.dataset_file.split("/")[3] + "-trec19-ranking"
+ #    result = "./data/results/" + name + ".tsv"
+ #    with open(result, "w") as f:
+ #        for i, query in enumerate(queries_trec19):
+ #            if i % 100 == 0:
+ #                print(f"Done {i}/{len(queries_trec19)} queries.")
+ #            ranking = rank(query, docs, model)["ranking"]
+ #            f.write(to_trec(query["query_id"], ranking, name))
 
     # Rerank mean
 
     # Rerank sum
-
-
-    # Evaluate
-    # results_from_file = evaluate(result, qrels_trec19, METRICS)
-    # print(f"results from {args.dataset_file} on {qrels_trec19}")
-    # print(results_from_file)
-
-    # Rank
-
-	# rank Mean
-
-	# rank Sum
-
-	# evaluate
 
 if __name__ == "__main__":
 	main()
