@@ -83,7 +83,8 @@ def main():
     a = time.time()
     for i, query in enumerate(queries_trec19):
         b = time.time()
-        print(f"Done {i}/{len(queries_trec19)} queries in {b-a} sec")
+        if i % 10 == 0:
+            print(f"Done {i}/{len(queries_trec19)} queries in {b-a} sec")
         ranking = rank(query, docs, model)["ranking"]
         # Rerank
         scores = {}
