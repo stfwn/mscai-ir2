@@ -20,22 +20,22 @@ cd ~/mscai-ir2/
 source activate mscai-ir2
 
 # Run
-srun python3 -u flatten_Pdataset.py -n 30 -k 0
-srun python3 -u flatten_Pdataset.py -n 30 -k 1
-srun python3 -u flatten_Pdataset.py -n 30 -k 2
-srun python3 -u flatten_Pdataset.py -n 30 -k 3
-srun python3 -u flatten_Pdataset.py -n 30 -k 4
-srun python3 -u flatten_Pdataset.py -n 30 -k 5
-srun python3 -u flatten_Pdataset.py -n 30 -k 6
-srun python3 -u flatten_Pdataset.py -n 30 -k 7
-srun python3 -u flatten_Pdataset.py -n 30 -k 8
-srun python3 -u flatten_Pdataset.py -n 30 -k 9
+# srun python3 -u flatten_Pdataset.py -n 30 -k 0
+# srun python3 -u flatten_Pdataset.py -n 30 -k 1
+# srun python3 -u flatten_Pdataset.py -n 30 -k 2
+# srun python3 -u flatten_Pdataset.py -n 30 -k 3
+# srun python3 -u flatten_Pdataset.py -n 30 -k 4
+# srun python3 -u flatten_Pdataset.py -n 30 -k 5
+# srun python3 -u flatten_Pdataset.py -n 30 -k 6
+# srun python3 -u flatten_Pdataset.py -n 30 -k 7
+# srun python3 -u flatten_Pdataset.py -n 30 -k 8
+# srun python3 -u flatten_Pdataset.py -n 30 -k 9
 
-srun python3 -u flatten_Pdataset.py -n 30 -k 10
-srun python3 -u flatten_Pdataset.py -n 30 -k 11
-srun python3 -u flatten_Pdataset.py -n 30 -k 12
-srun python3 -u flatten_Pdataset.py -n 30 -k 13
-srun python3 -u flatten_Pdataset.py -n 30 -k 14
+# srun python3 -u flatten_Pdataset.py -n 30 -k 10
+# srun python3 -u flatten_Pdataset.py -n 30 -k 11
+# srun python3 -u flatten_Pdataset.py -n 30 -k 12
+# srun python3 -u flatten_Pdataset.py -n 30 -k 13
+# srun python3 -u flatten_Pdataset.py -n 30 -k 14
 srun python3 -u flatten_Pdataset.py -n 30 -k 15
 srun python3 -u flatten_Pdataset.py -n 30 -k 16
 srun python3 -u flatten_Pdataset.py -n 30 -k 17
