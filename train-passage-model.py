@@ -71,7 +71,7 @@ def loss_fn(query_embeddings, doc_embeddings):
         doc_embeddings = torch.vstack(doc_embeddings)
 
     dot_sim_matrix = query_embeddings @ doc_embeddings.transpose(0, 1)
-    labels = torch.arange(len(query_embeddings))
+    labels = torch.arange(len(query_embeddings), device=dot_sim_matrix.device)
     return F.cross_entropy(dot_sim_matrix, labels, reduction="mean")
 
 
