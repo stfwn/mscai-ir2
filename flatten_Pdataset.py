@@ -18,7 +18,7 @@ def main(args):
 
     num_shards = args.n_shards
     k = args.fold_k
-    
+
     START = int((k/num_shards)*3201821)
     END = int((k+1/num_shards)*3201821)
 
@@ -32,10 +32,11 @@ def main(args):
         'passage_embedding': []
     }
     a = time.time()
-    for i, doc in enumerate(docs):
+    for i in range(3201821):
         if i < START:
             pass
         else:
+            doc = docs[i]
             if i % 100 == 0:
                 b = time.time()
                 print(f"Flattening doc {i} out of {len(docs)}; time {b-a}")
