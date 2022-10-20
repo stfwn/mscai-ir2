@@ -4,7 +4,7 @@ import datasets
 import torch
 import torch.nn.functional as F
 from torch import nn
-from transformers import Trainer
+from transformers import Trainer, TrainingArguments
 
 import models
 
@@ -18,6 +18,14 @@ def main():
         model=PassageModelWrapper(model),
         data_collator=collate_fn,
         train_dataset=ds,
+        args=TrainingArguments(
+            per_device_train_batch_size=64,
+            output_dir="./models/passage-transformer-v1",
+            report_to=["tensorboard", "wandb"],
+            save_strategy="steps",
+            save_steps=500,
+            fp16=True,
+        ),
     )
     trainer.train()
 
