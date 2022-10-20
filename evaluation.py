@@ -84,8 +84,8 @@ def main(args):
         for i, query in enumerate(queries_msmarco):
             if i % 100 == 0:
                 print(f"Done {i}/{len(queries_msmarco)} queries.")
-            query_emb = model.encode(query["text"])
-            print(type(query_emb), query_emb.shape, type(query_emb[0]), query_emb[0])
+            # query_emb = model.encode(query["text"])
+            # print(type(query_emb), query_emb.shape, type(query_emb[0]), query_emb[0])
             print(np.array(query["embedding"]).shape, type(np.array(query["embedding"])[0]), np.array(query["embedding"])[0])
             scores, retrieved_docs = docs.get_nearest_examples("embedding", np.array(query["embedding"]), k=config.ranking_size)
             ranking = dict(zip(retrieved_docs["doc_id"], scores))
