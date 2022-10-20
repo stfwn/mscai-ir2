@@ -49,9 +49,10 @@ class PassageTransformer(Module):
         padding_mask = (batch == 0.0).sum(-1) == self.d_model
         output = self.transformer(batch, mask=None, src_key_padding_mask=padding_mask)
         if self.pooling_method == "mean":
-            return torch.vstack(
-                [o[~m].mean(dim=0) for o, m in zip(output, padding_mask)]
-            )
+            padding_mask_inv = ~padding_mask
+            return (output * padding_mask_inv.unsqueeze(-1)).sum(
+                dim=1
+            ) / padding_mask_inv.sum(dim=1).unsqueeze(-1)
         else:
             raise NotImplementedError("Unknown pooling method:", self.pooling_method)
 
