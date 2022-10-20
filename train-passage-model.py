@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+import os
 from pathlib import Path
 
 import datasets
@@ -9,7 +11,7 @@ from transformers import Trainer, TrainingArguments
 import models
 
 
-def main():
+def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = models.PassageTransformer().to(device)
 
@@ -20,11 +22,15 @@ def main():
         train_dataset=ds,
         args=TrainingArguments(
             per_device_train_batch_size=64,
-            output_dir="./models/passage-transformer-v1",
+            output_dir=f"./models/passage-transformer-v{args.version}",
             report_to=["tensorboard", "wandb"],
             save_strategy="steps",
             save_steps=500,
             fp16=True,
+            num_train_epochs=100,
+            dataloader_num_workers=os.cpu_count(),
+            resume_from_checkpoint=True,
+            save_total_limit=10,
         ),
     )
     trainer.train()
@@ -76,4 +82,12 @@ def loss_fn(query_embeddings, doc_embeddings):
 
 
 if __name__ == "__main__":
-    main()
+    parser = ArgumentParser()
+    parser.add_argument(
+        "-v",
+        "--version",
+        type=int,
+        help="Simple versioning system. If you don't know what to pick: check in ./models and use one that's not there",
+    )
+    args = parser.parse_args()
+    main(args)
