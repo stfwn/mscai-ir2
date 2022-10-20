@@ -19,7 +19,7 @@ k = args.fold_k
 START = int((k/num_shards)*3201821)
 END = int((k+1/num_shards)*3201821)
 
-def main():
+def main(args):
 
     print("===>STARTING SHARTING")
     docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')
@@ -66,7 +66,6 @@ if __name__ == "__main__":
     )
     args = argparser.parse_args()
     main(args)
-    main()
 
 
 
