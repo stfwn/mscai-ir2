@@ -70,11 +70,9 @@ def loss_fn(query_embeddings, doc_embeddings):
     if not isinstance(doc_embeddings, torch.Tensor):
         doc_embeddings = torch.vstack(doc_embeddings)
 
-    doc_embeddings_norm = F.normalize(doc_embeddings)
-    query_embeddings_norm = F.normalize(query_embeddings)
-    cos_sim_matrix = query_embeddings_norm @ doc_embeddings_norm.transpose(0, 1)
+    dot_sim_matrix = query_embeddings_norm @ doc_embeddings_norm.transpose(0, 1)
     labels = torch.arange(len(query_embeddings))
-    return F.cross_entropy(cos_sim_matrix, labels, reduction="mean")
+    return F.cross_entropy(dot_sim_matrix, labels, reduction="mean")
 
 
 if __name__ == "__main__":
