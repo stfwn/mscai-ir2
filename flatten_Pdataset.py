@@ -21,7 +21,7 @@ def main(args):
     k = args.fold_k
 
     START = int((k/num_shards)*3201821)
-    END = int((k+1/num_shards)*3201821)
+    END = int(((k+1)/num_shards)*3201821)
 
     print("===>STARTING SHARTING")
     docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')
@@ -48,7 +48,7 @@ def main(args):
                 passages = Dataset.from_dict(ps_data)
                 passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened_{}/'.format(k))
                 print('Saved flattened passage dataset to disk')
-                sys.exit()
+                break
 
 
 
