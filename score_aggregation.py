@@ -13,8 +13,6 @@ from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
 
-import gc
-
 
 def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     scores, retrieved_docs = docs.get_nearest_examples(
@@ -42,7 +40,7 @@ def main():
     except:
         print("===>STARTING SHARTING")
         num_shards = 30
-        for k in range(num_shards):
+        for k in range(1,num_shards):
             # load only shard
             docs = Dataset.from_dict(
                     Dataset.load_from_disk(
@@ -66,11 +64,6 @@ def main():
             passages = Dataset.from_dict(ps_data)
             passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened_{}/'.format(k))
             print('Saved flattened passage dataset to disk')
-
-            del docs
-            del ps_data
-            del passages
-            gc.collect()
 
     # build faiss index
     try:
