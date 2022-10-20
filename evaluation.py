@@ -83,6 +83,7 @@ def main(args):
         for i, query in enumerate(queries_msmarco):
             if i % 100 == 0:
                 print(f"Done {i}/{len(queries_msmarco)} queries.")
+            print(query, type(query["embedding"]))
             scores, retrieved_docs = docs.get_nearest_examples("embedding", query["embedding"], k=config.ranking_size)
             ranking = dict(zip(retrieved_docs["doc_id"], scores))
             results.append((query["query_id"], ranking, name))
