@@ -13,23 +13,33 @@ import models
 
 def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = models.PassageTransformer().to(device)
+    model = PassageModelWrapper(models.PassageTransformer()).to(device)
 
     ds = datasets.load_from_disk(Path("./data/ms-marco/embedding-training-set"))
+    print("Version:", args.version)
+    output_dir = f"./models/passage-transformer-v{args.version}"
+    # This commented out stuff loads the latest checkpoint
+    # but the trainer's state (like the learning rate etc) will not be loaded
+    #
+    # latest_version_dir = sorted(
+    #     Path(output_dir).glob("checkpoint-*"),
+    #     key=lambda x: int(x.name.split("-")[-1]),
+    # )[-1]
+    # model.load_state_dict(torch.load(latest_version_dir / "pytorch_model.bin"))
+    # print("Starting from checkpoint:", latest_version_dir)
     trainer = PassageModelTrainer(
-        model=PassageModelWrapper(model),
+        model=model,
         data_collator=collate_fn,
         train_dataset=ds,
         args=TrainingArguments(
             per_device_train_batch_size=64,
-            output_dir=f"./models/passage-transformer-v{args.version}",
+            output_dir=output_dir,
             report_to=["tensorboard", "wandb"],
             save_strategy="steps",
-            save_steps=500,
+            save_steps=10000,
             fp16=True,
             num_train_epochs=100,
             dataloader_num_workers=os.cpu_count(),
-            resume_from_checkpoint=True,
             save_total_limit=10,
         ),
     )
@@ -87,6 +97,7 @@ if __name__ == "__main__":
         "-v",
         "--version",
         type=int,
+        required=True,
         help="Simple versioning system. If you don't know what to pick: check in ./models and use one that's not there",
     )
     args = parser.parse_args()
