@@ -13,13 +13,14 @@ from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
 
-num_shards = args.n_shards
-k = args.fold_k
-
-START = int((k/num_shards)*3201821)
-END = int((k+1/num_shards)*3201821)
 
 def main(args):
+
+    num_shards = args.n_shards
+    k = args.fold_k
+    
+    START = int((k/num_shards)*3201821)
+    END = int((k+1/num_shards)*3201821)
 
     print("===>STARTING SHARTING")
     docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model/')
