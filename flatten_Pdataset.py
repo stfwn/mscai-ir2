@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 import os
 import json
 import time
+import sys
 
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
@@ -43,12 +44,11 @@ def main(args):
             for passage in doc['passages']:
                 ps_data['passage_id'].append(passage['passage_id'])
                 ps_data['passage_embedding'].append(passage['passage_embedding'])
-            if i > END:
-                break
-
-    passages = Dataset.from_dict(ps_data)
-    passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened_{}/'.format(k))
-    print('Saved flattened passage dataset to disk')
+            if i >= END:
+                passages = Dataset.from_dict(ps_data)
+                passages.save_to_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened_{}/'.format(k))
+                print('Saved flattened passage dataset to disk')
+                sys.exit()
 
 
 
@@ -68,8 +68,3 @@ if __name__ == "__main__":
     )
     args = argparser.parse_args()
     main(args)
-
-
-
-
-
