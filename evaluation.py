@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer, util
 import torch
 from ir_measures import *
 import ir_measures
+import numpy as np
 
 import config
 from data import MSMarcoDocs, TREC2019, TREC2020
@@ -83,8 +84,7 @@ def main(args):
         for i, query in enumerate(queries_msmarco):
             if i % 100 == 0:
                 print(f"Done {i}/{len(queries_msmarco)} queries.")
-            print(query, type(query["embedding"]))
-            scores, retrieved_docs = docs.get_nearest_examples("embedding", query["embedding"], k=config.ranking_size)
+            scores, retrieved_docs = docs.get_nearest_examples("embedding", np.array(query["embedding"]), k=config.ranking_size)
             ranking = dict(zip(retrieved_docs["doc_id"], scores))
             results.append((query["query_id"], ranking, name))
             # run_msmarco.update({query['query_id'] : ranking})
