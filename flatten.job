@@ -2,7 +2,7 @@
 
 #SBATCH --partition=gpu_shared_course
 #SBATCH --gres=gpu:1
-#SBATCH --job-name=score-aggregation
+#SBATCH --job-name=flatten_shard
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
 #SBATCH --time=4:00:00
@@ -31,24 +31,24 @@ source activate mscai-ir2
 # srun python3 -u flatten_Pdataset.py -n 30 -k 8
 # srun python3 -u flatten_Pdataset.py -n 30 -k 9
 
-# srun python3 -u flatten_Pdataset.py -n 30 -k 10
-# srun python3 -u flatten_Pdataset.py -n 30 -k 11
-# srun python3 -u flatten_Pdataset.py -n 30 -k 12
-# srun python3 -u flatten_Pdataset.py -n 30 -k 13
-# srun python3 -u flatten_Pdataset.py -n 30 -k 14
-srun python3 -u flatten_Pdataset.py -n 30 -k 15
-srun python3 -u flatten_Pdataset.py -n 30 -k 16
-srun python3 -u flatten_Pdataset.py -n 30 -k 17
-srun python3 -u flatten_Pdataset.py -n 30 -k 18
-srun python3 -u flatten_Pdataset.py -n 30 -k 19
+srun python3 -u flatten_Pdataset.py -n 30 -k 10
+srun python3 -u flatten_Pdataset.py -n 30 -k 11
+srun python3 -u flatten_Pdataset.py -n 30 -k 12
+srun python3 -u flatten_Pdataset.py -n 30 -k 13
+srun python3 -u flatten_Pdataset.py -n 30 -k 14
+# srun python3 -u flatten_Pdataset.py -n 30 -k 15
+# srun python3 -u flatten_Pdataset.py -n 30 -k 16
+# srun python3 -u flatten_Pdataset.py -n 30 -k 17
+# srun python3 -u flatten_Pdataset.py -n 30 -k 18
+# srun python3 -u flatten_Pdataset.py -n 30 -k 19
 
-srun python3 -u flatten_Pdataset.py -n 30 -k 20
-srun python3 -u flatten_Pdataset.py -n 30 -k 21
-srun python3 -u flatten_Pdataset.py -n 30 -k 22
-srun python3 -u flatten_Pdataset.py -n 30 -k 23
-srun python3 -u flatten_Pdataset.py -n 30 -k 24
-srun python3 -u flatten_Pdataset.py -n 30 -k 25
-srun python3 -u flatten_Pdataset.py -n 30 -k 26
-srun python3 -u flatten_Pdataset.py -n 30 -k 27
-srun python3 -u flatten_Pdataset.py -n 30 -k 28
-srun python3 -u flatten_Pdataset.py -n 30 -k 29
+# srun python3 -u flatten_Pdataset.py -n 30 -k 20
+# srun python3 -u flatten_Pdataset.py -n 30 -k 21
+# srun python3 -u flatten_Pdataset.py -n 30 -k 22
+# srun python3 -u flatten_Pdataset.py -n 30 -k 23
+# srun python3 -u flatten_Pdataset.py -n 30 -k 24
+# srun python3 -u flatten_Pdataset.py -n 30 -k 25
+# srun python3 -u flatten_Pdataset.py -n 30 -k 26
+# srun python3 -u flatten_Pdataset.py -n 30 -k 27
+# srun python3 -u flatten_Pdataset.py -n 30 -k 28
+# srun python3 -u flatten_Pdataset.py -n 30 -k 29
