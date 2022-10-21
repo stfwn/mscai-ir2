@@ -98,6 +98,50 @@ def main():
             f.write(to_trec(query_id, ranking, name))
 
 
+    # Load queries and qrels
+    trec20 = TREC2020()
+    queries_trec20 = trec20.get_queries()["test"]
+    qrels_trec20 = "./data/trec/2020qrels-docs.tsv"
+    # Rank
+    name = "passages-trec20-ranking"
+    results_max = []
+    results_mean = []
+    results_sum = []
+    a = time.time()
+    for i, query in enumerate(queries_trec20):
+        b = time.time()
+        if i % 10 == 0:
+            print(f"Done {i}/{len(queries_trec20)} queries in {b-a} sec")
+        ranking = rank(query, docs, model)["ranking"]
+        # Rerank
+        scores = {}
+        for p_id in ranking.keys():
+            d_id = p_id.split('_')[0]
+            i = ds['doc_id'].index(d_id)
+            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in ds['passages'][i]['passage_embedding']])
+            scores.update({d_id: (doc_scores.sum(), doc_scores.mean())})
+
+        rerank_sum = {k: v[0] for k, v in sorted(scores.items(), key=lambda item: item[1][0], reverse=True)}
+        rerank_mean = {k: v[1] for k, v in sorted(scores.items(), key=lambda item: item[1][1], reverse=True)}
+
+        results_max.append((query["query_id"], ranking, name+'max'))
+        results_mean.append((query["query_id"], rerank_mean, name+'mean'))
+        results_sum.append((query["query_id"], rerank_sum, name+'sum'))
+
+    result_file = "./data/results/" + name + "max.tsv"
+    with open(result_file, "w") as f:
+        for query_id, ranking, name in results_max:
+            f.write(to_trec(query_id, ranking, name))
+
+    result_file = "./data/results/" + name + "mean.tsv"
+    with open(result_file, "w") as f:
+        for query_id, ranking, name in results_mean:
+            f.write(to_trec(query_id, ranking, name))
+
+    result_file = "./data/results/" + name + "sum.tsv"
+    with open(result_file, "w") as f:
+        for query_id, ranking, name in results_sum:
+            f.write(to_trec(query_id, ranking, name))
 
 if __name__ == "__main__":
     main()

@@ -66,7 +66,7 @@ def main(args):
     )
     print(f"Using device: {model.device}")
 
-    ms_marco = True
+    ms_marco = False
     if ms_marco:
         # Initialize MS-MARCO
         ms_marco_docs = MSMarcoDocs()
