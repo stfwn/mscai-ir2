@@ -28,6 +28,16 @@ def to_trec(query_id: str, ranking: dict, name: str) -> str:
         result += f"{query_id}\t0\t{doc_id}\t{i+1}\t{score}\t{name}\n"
     return result
 
+def get_embeddings(d_id: str, passages: Dataset) --> list:
+    i = passages['passage_id'].index(d_id+'_0')
+    embs = [passages['passage_embedding'][i]]
+    i+=1
+    while passages['passage_id'][i].split('_')[0] == d_id:   
+        embs.appen(passages['passage_embedding'][i])
+        i+=1
+    return embs
+
+
 def main():
 
     # Load model
@@ -71,8 +81,7 @@ def main():
         scores = {}
         for p_id in ranking.keys():
             d_id = p_id.split('_')[0]
-            i = ds['doc_id'].index(d_id)
-            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in ds['passages'][i]['passage_embedding']])
+            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in get_embeddings(d_id)])
             scores.update({d_id: (doc_scores.sum(), doc_scores.mean())})
 
         rerank_sum = {k: v[0] for k, v in sorted(scores.items(), key=lambda item: item[1][0], reverse=True)}
@@ -117,8 +126,7 @@ def main():
         scores = {}
         for p_id in ranking.keys():
             d_id = p_id.split('_')[0]
-            i = ds['doc_id'].index(d_id)
-            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in ds['passages'][i]['passage_embedding']])
+            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in get_embeddings(d_id)])
             scores.update({d_id: (doc_scores.sum(), doc_scores.mean())})
 
         rerank_sum = {k: v[0] for k, v in sorted(scores.items(), key=lambda item: item[1][0], reverse=True)}
