@@ -5,7 +5,7 @@
 #SBATCH --job-name=stitch
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
-#SBATCH --time=1:00:00
+#SBATCH --time=4:00:00
 #SBATCH --mem=64000M
 #SBATCH --output=slurm_output_%A.out
 
@@ -20,4 +20,4 @@ cd ~/mscai-ir2/
 source activate mscai-ir2
 
 # Run
-srun python3 -u stitch_Pdataset.py -n 30
+srun python3 -u stitch_Pdatasets.py -n 30
