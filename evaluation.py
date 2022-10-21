@@ -6,8 +6,8 @@ import json
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
-from ir_measures import *
-import ir_measures
+# from ir_measures import *
+# import ir_measures
 import numpy as np
 
 import config
@@ -46,11 +46,11 @@ def to_trec(query_id: str, ranking: dict, name: str) -> str:
     return result
 
 
-def evaluate(run, qrels_path: str, metrics: list) -> dict:
-    if isinstance(run, str):
-        run = ir_measures.read_trec_run(run)
-    qrels = ir_measures.read_trec_qrels(qrels_path)
-    return ir_measures.calc_aggregate(metrics, qrels, run)
+# def evaluate(run, qrels_path: str, metrics: list) -> dict:
+#     if isinstance(run, str):
+#         run = ir_measures.read_trec_run(run)
+#     qrels = ir_measures.read_trec_qrels(qrels_path)
+#     return ir_measures.calc_aggregate(metrics, qrels, run)
 
 
 def main(args):
@@ -91,9 +91,9 @@ def main(args):
                 f.write(to_trec(query_id, ranking, name))
                 
         # Evaluate (either from dict or from TREC formatted file)
-        results_from_file = evaluate(result_file, qrels_msmarco, METRICS)
-        print(f"results from {args.dataset_file} on {qrels_msmarco}")
-        print(results_from_file)
+        # results_from_file = evaluate(result_file, qrels_msmarco, METRICS)
+        # print(f"results from {args.dataset_file} on {qrels_msmarco}")
+        # print(results_from_file)
 
     trec = False
     if trec:
