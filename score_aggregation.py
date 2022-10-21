@@ -7,6 +7,7 @@ import time
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
+import numpy as np
 
 import config
 from data import MSMarcoDocs, TREC2019, TREC2020
