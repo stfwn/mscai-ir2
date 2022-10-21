@@ -18,7 +18,7 @@ def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     scores, retrieved_docs = docs.get_nearest_examples(
         "passage_embedding", model.encode(query["text"]), k=config.ranking_size
     )
-    query["ranking"] = dict(zip(retrieved_docs["doc_id"], scores))
+    query["ranking"] = dict(zip(retrieved_docs["passage_id"], scores))
     return query
 
 
