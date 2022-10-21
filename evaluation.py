@@ -15,7 +15,7 @@ from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
 
-METRICS = [RR@10, nDCG@10, R@1000, nDCG, RR, AP, P @ 1, P @ 5, P @ 20, P @ 100, R @ 100]
+# METRICS = [RR@10, nDCG@10, R@1000, nDCG, RR, AP, P @ 1, P @ 5, P @ 20, P @ 100, R @ 100]
 
 """
 Evaluation
