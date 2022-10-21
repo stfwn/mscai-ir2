@@ -33,7 +33,7 @@ def get_embeddings(d_id: str, passages: Dataset) -> list:
     embs = [passages['passage_embedding'][i]]
     i+=1
     while passages['passage_id'][i].split('_')[0] == d_id:   
-        embs.appen(passages['passage_embedding'][i])
+        embs.append(passages['passage_embedding'][i])
         i+=1
     return embs
 
