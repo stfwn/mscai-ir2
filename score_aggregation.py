@@ -82,7 +82,7 @@ def main():
         scores = {}
         for p_id in ranking.keys():
             d_id = p_id.split('_')[0]
-            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in get_embeddings(d_id)])
+            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in get_embeddings(d_id, passages)])
             scores.update({d_id: (doc_scores.sum(), doc_scores.mean())})
 
         rerank_sum = {k: v[0] for k, v in sorted(scores.items(), key=lambda item: item[1][0], reverse=True)}
@@ -127,7 +127,7 @@ def main():
         scores = {}
         for p_id in ranking.keys():
             d_id = p_id.split('_')[0]
-            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in get_embeddings(d_id)])
+            doc_scores = np.array([np.dot(query_embedding, passage_embedding) for passage_embedding in get_embeddings(d_id, passages)])
             scores.update({d_id: (doc_scores.sum(), doc_scores.mean())})
 
         rerank_sum = {k: v[0] for k, v in sorted(scores.items(), key=lambda item: item[1][0], reverse=True)}
