@@ -36,6 +36,7 @@ def get_embeddings(d_id: str, passages: Dataset) -> list:
     while passages['passage_id'][i].split('_')[0] == d_id:   
         embs.append(passages['passage_embedding'][i])
         i+=1
+        print(f"found passage {i}")
     return embs
 
 
@@ -52,6 +53,7 @@ def main():
     # build faiss index
     try:
         passages.load_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
+        print('loaded faiss from disk')
     except:
         passages.add_faiss_index(column="passage_embedding")
         passages.save_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
@@ -67,8 +69,10 @@ def main():
     trec19 = TREC2019()
     queries_trec19 = trec19.get_queries()["test"]
     qrels_trec19 = "./data/trec/2019qrels-docs.tsv"
+    print('loaded queries and qrels')
     # Rank
     name = "passages-trec19-ranking"
+    print('writing to {}'.format(name))
     results_max = []
     results_mean = []
     results_sum = []
