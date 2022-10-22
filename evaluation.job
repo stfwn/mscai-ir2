@@ -5,7 +5,7 @@
 #SBATCH --job-name=evaluate-doc-embeddings
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
-#SBATCH --time=4:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem=32000M
 #SBATCH --output=slurm_output_%A.out
 
