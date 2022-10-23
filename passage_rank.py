@@ -59,7 +59,8 @@ def main():
         passages.add_faiss_index(column="passage_embedding", metric_type=faiss.METRIC_INNER_PRODUCT)
         passages.save_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
         print('Saved faiss index to disk')
-
+        
+    print('got this far')
     print(docs.get_nearest_examples("passage_embedding", model.encode("hello world"), k=10))
     # # Load queries and qrels
     # trec19 = TREC2019()
