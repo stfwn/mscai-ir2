@@ -28,6 +28,7 @@ def main(args):
 
     print("==> Loading docs shard")
     ms_marco_docs = MSMarcoDocs()
+    docs = ms_marco_docs.get_docs()
     # docs = (
     #     ms_marco_docs.get_docs()
     #     .sort("doc_id")
