@@ -28,17 +28,10 @@ def main(args):
 
     print("==> Loading docs shard")
     ms_marco_docs = MSMarcoDocs()
-    docs = ms_marco_docs.get_docs()
-    # docs = (
-    #     ms_marco_docs.get_docs()
-    #     .sort("doc_id")
-    #     .shard(
-    #         num_shards=args.n_shards,
-    #         index=args.shard_index,
-    #         contiguous=True,
-    #     )
-    #     .filter(lambda d: d["body"] != "" and d["body"] is not None)
-    # )
+    docs = (
+        ms_marco_docs.get_docs()
+        .filter(lambda d: d["body"] != "" and d["body"] is not None)
+    )
     print("==> Splitting docs into passages")
     docs = docs.map(
         preprocessing.doc_to_passages,
