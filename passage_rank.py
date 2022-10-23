@@ -8,6 +8,7 @@ from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
 import numpy as np
+import faiss
 
 import config
 from data import MSMarcoDocs, TREC2019, TREC2020
@@ -29,15 +30,15 @@ def to_trec(query_id: str, ranking: dict, name: str) -> str:
         result += f"{query_id}\t0\t{doc_id}\t{i+1}\t{score}\t{name}\n"
     return result
 
-def get_embeddings(d_id: str, passages: Dataset) -> list:
-    i = passages['passage_id'].index(d_id+'_0')
-    embs = [passages['passage_embedding'][i]]
-    i+=1
-    while passages['passage_id'][i].split('_')[0] == d_id:   
-        embs.append(passages['passage_embedding'][i])
-        i+=1
-        print(f"found passage {i}")
-    return embs
+# def get_embeddings(d_id: str, passages: Dataset) -> list:
+#     i = passages['passage_id'].index(d_id+'_0')
+#     embs = [passages['passage_embedding'][i]]
+#     i+=1
+#     while passages['passage_id'][i].split('_')[0] == d_id:   
+#         embs.append(passages['passage_embedding'][i])
+#         i+=1
+#         print(f"found passage {i}")
+#     return embs
 
 
 def main():
@@ -54,8 +55,8 @@ def main():
     try:
         passages.load_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
         print('loaded faiss from disk')
-    except:
-        passages.add_faiss_index(column="passage_embedding")
+    except:        
+        passages.add_faiss_index(column="passage_embedding", metric_type=faiss.METRIC_INNER_PRODUCT)
         passages.save_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
         print('Saved faiss index to disk')
 
