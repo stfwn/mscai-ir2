@@ -1,5 +1,5 @@
 from typing import Any, Callable, Literal
-
+import config
 from sentence_transformers.SentenceTransformer import SentenceTransformer
 
 
@@ -77,3 +77,20 @@ def doc_to_passages(
     ]
     del doc["body"]
     return doc
+
+def doc_to_longformer_input(
+    doc: dict,
+    passage_size: int,
+):
+    MAX_TITLE_LEN = 50
+    if doc["title"]:
+        doc['title'] = doc['title'][:MAX_TITLE_LEN]
+    else: doc['title'] = ''
+    
+    if doc['body']:
+        doc['body'] = doc['title'] + doc['body'] if doc['title'] else doc['body']
+        if len(doc['body']) > passage_size:
+            doc['body'] = doc['body'][:passage_size]
+    
+    return doc
+    
