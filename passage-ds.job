@@ -31,22 +31,22 @@ source activate mscai-ir2
 # srun python3 compute-passage-ds.py -n 30 -i 8
 # srun python3 compute-passage-ds.py -n 30 -i 9
 
-srun python3 compute-passage-ds.py -n 30 -i 10
-srun python3 compute-passage-ds.py -n 30 -i 11
-srun python3 compute-passage-ds.py -n 30 -i 12
-srun python3 compute-passage-ds.py -n 30 -i 13
-srun python3 compute-passage-ds.py -n 30 -i 14
-srun python3 compute-passage-ds.py -n 30 -i 15
-srun python3 compute-passage-ds.py -n 30 -i 16
-srun python3 compute-passage-ds.py -n 30 -i 17
-srun python3 compute-passage-ds.py -n 30 -i 18
-srun python3 compute-passage-ds.py -n 30 -i 19
+# srun python3 compute-passage-ds.py -n 30 -i 10
+# srun python3 compute-passage-ds.py -n 30 -i 11
+# srun python3 compute-passage-ds.py -n 30 -i 12
+# srun python3 compute-passage-ds.py -n 30 -i 13
+# srun python3 compute-passage-ds.py -n 30 -i 14
+# srun python3 compute-passage-ds.py -n 30 -i 15
+# srun python3 compute-passage-ds.py -n 30 -i 16
+# srun python3 compute-passage-ds.py -n 30 -i 17
+# srun python3 compute-passage-ds.py -n 30 -i 18
+# srun python3 compute-passage-ds.py -n 30 -i 19
 
-# srun python3 compute-passage-ds.py -n 30 -i 20
-# srun python3 compute-passage-ds.py -n 30 -i 21
-# srun python3 compute-passage-ds.py -n 30 -i 22
-# srun python3 compute-passage-ds.py -n 30 -i 23
-# srun python3 compute-passage-ds.py -n 30 -i 24
+srun python3 compute-passage-ds.py -n 30 -i 20
+srun python3 compute-passage-ds.py -n 30 -i 21
+srun python3 compute-passage-ds.py -n 30 -i 22
+srun python3 compute-passage-ds.py -n 30 -i 23
+srun python3 compute-passage-ds.py -n 30 -i 24
 # srun python3 compute-passage-ds.py -n 30 -i 25
 # srun python3 compute-passage-ds.py -n 30 -i 26
 # srun python3 compute-passage-ds.py -n 30 -i 27
