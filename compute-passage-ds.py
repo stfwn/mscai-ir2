@@ -15,10 +15,10 @@ import preprocessing
 
 
 def main(args):
-    # print("=" * 10)
-    # print("Number of shards:", args.n_shards)
-    # print("Computing shard:", args.shard_index)
-    # print("=" * 10)
+    print("=" * 10)
+    print("Number of shards:", args.n_shards)
+    print("Computing shard:", args.shard_index)
+    print("=" * 10)
 
     print("==> Initializing model")
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -30,6 +30,12 @@ def main(args):
     ms_marco_docs = MSMarcoDocs()
     docs = (
         ms_marco_docs.get_docs()
+        .sort("doc_id")
+        .shard(
+            num_shards=args.n_shards,
+            index=args.shard_index,
+            contiguous=True,
+        )
         .filter(lambda d: d["body"] != "" and d["body"] is not None)
     )
     print("==> Splitting docs into passages")
@@ -60,13 +66,13 @@ def main(args):
 
 if __name__ == "__main__":
     argparser = ArgumentParser()
-    # argparser.add_argument("-n", "--n-shards", type=int, help="Total number of shards.")
-    # argparser.add_argument(
-    #     "-i",
-    #     "--shard-index",
-    #     type=int,
-    #     help="Which shard to compute.",
-    # )
+    argparser.add_argument("-n", "--n-shards", type=int, help="Total number of shards.")
+    argparser.add_argument(
+        "-i",
+        "--shard-index",
+        type=int,
+        help="Which shard to compute.",
+    )
 
     argparser.add_argument("--passage-size", type=int, default=512)
     argparser.add_argument(
