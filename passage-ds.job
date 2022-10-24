@@ -20,27 +20,27 @@ cd ~/mscai-ir2/
 source activate mscai-ir2
 
 # Run
-srun python3 compute-passage-ds.py -n 30 -i 0
-srun python3 compute-passage-ds.py -n 30 -i 1
-srun python3 compute-passage-ds.py -n 30 -i 2
-srun python3 compute-passage-ds.py -n 30 -i 3
-srun python3 compute-passage-ds.py -n 30 -i 4
-srun python3 compute-passage-ds.py -n 30 -i 5
-srun python3 compute-passage-ds.py -n 30 -i 6
-srun python3 compute-passage-ds.py -n 30 -i 7
-srun python3 compute-passage-ds.py -n 30 -i 8
-srun python3 compute-passage-ds.py -n 30 -i 9
+# srun python3 compute-passage-ds.py -n 30 -i 0
+# srun python3 compute-passage-ds.py -n 30 -i 1
+# srun python3 compute-passage-ds.py -n 30 -i 2
+# srun python3 compute-passage-ds.py -n 30 -i 3
+# srun python3 compute-passage-ds.py -n 30 -i 4
+# srun python3 compute-passage-ds.py -n 30 -i 5
+# srun python3 compute-passage-ds.py -n 30 -i 6
+# srun python3 compute-passage-ds.py -n 30 -i 7
+# srun python3 compute-passage-ds.py -n 30 -i 8
+# srun python3 compute-passage-ds.py -n 30 -i 9
 
-# srun python3 compute-passage-ds.py -n 30 -i 10
-# srun python3 compute-passage-ds.py -n 30 -i 11
-# srun python3 compute-passage-ds.py -n 30 -i 12
-# srun python3 compute-passage-ds.py -n 30 -i 13
-# srun python3 compute-passage-ds.py -n 30 -i 14
-# srun python3 compute-passage-ds.py -n 30 -i 15
-# srun python3 compute-passage-ds.py -n 30 -i 16
-# srun python3 compute-passage-ds.py -n 30 -i 17
-# srun python3 compute-passage-ds.py -n 30 -i 18
-# srun python3 compute-passage-ds.py -n 30 -i 19
+srun python3 compute-passage-ds.py -n 30 -i 10
+srun python3 compute-passage-ds.py -n 30 -i 11
+srun python3 compute-passage-ds.py -n 30 -i 12
+srun python3 compute-passage-ds.py -n 30 -i 13
+srun python3 compute-passage-ds.py -n 30 -i 14
+srun python3 compute-passage-ds.py -n 30 -i 15
+srun python3 compute-passage-ds.py -n 30 -i 16
+srun python3 compute-passage-ds.py -n 30 -i 17
+srun python3 compute-passage-ds.py -n 30 -i 18
+srun python3 compute-passage-ds.py -n 30 -i 19
 
 # srun python3 compute-passage-ds.py -n 30 -i 20
 # srun python3 compute-passage-ds.py -n 30 -i 21
