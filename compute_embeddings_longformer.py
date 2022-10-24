@@ -84,7 +84,7 @@ if __name__ == "__main__":
         "--model_path", default='allenai/longformer-base-4096'
     )
     argparser.add_argument(
-        "--batch_size", default=32
+        "--batch_size", default=32, type=int
     )
 
     args = argparser.parse_args()
