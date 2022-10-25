@@ -59,18 +59,20 @@ def main():
         passages.add_faiss_index(column="passage_embedding", metric_type=faiss.METRIC_INNER_PRODUCT)
         passages.save_faiss_index("passage_embedding", "./data/ms-marco/passage-embeddings/passage-embeddings.faiss")
         print('Saved faiss index to disk')
-        
+
     # Load queries and qrels
     trec19 = TREC2019()
+    print("init done")
     queries_trec19 = trec19.get_queries()["test"]
+    print("queries loaded")
     qrels_trec19 = "./data/trec/2019qrels-docs.tsv"
-    print('loaded queries and qrels')
+    print('qrels set')
     # Rank
     name = "passages-trec19-ranking"
     print('writing to {}'.format(name))
     results_max = []
-    results_mean = []
-    results_sum = []
+    # results_mean = []
+    # results_sum = []
     a = time.time()
     for i, query in enumerate(queries_trec19):
         b = time.time()
