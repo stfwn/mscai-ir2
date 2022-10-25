@@ -95,7 +95,7 @@ def main(args):
         # print(f"results from {args.dataset_file} on {qrels_msmarco}")
         # print(results_from_file)
 
-    trec = False
+    trec = True
     if trec:
         # Initialize TREC 2019
         trec19 = TREC2019()
@@ -117,10 +117,10 @@ def main(args):
 
         # Evaluate (either from dict or from TREC formatted file)
         # results_from_dict = evaluate(run_trec19, qrels_trec19, METRICS)
-        results_from_file = evaluate(result, qrels_trec19, METRICS)
+        # results_from_file = evaluate(result, qrels_trec19, METRICS)
         # print(results_from_dict)
-        print(f"results from {args.dataset_file} on {qrels_trec19}")
-        print(results_from_file)
+        # print(f"results from {args.dataset_file} on {qrels_trec19}")
+        # print(results_from_file)
 
         # Initialize TREC 2020
         trec20 = TREC2020()
@@ -143,10 +143,10 @@ def main(args):
 
         # Evaluate (either from dict or from TREC formatted file)
         # results_from_dict = evaluate(run_trec20, qrels_trec20, METRICS)
-        results_from_file = evaluate(result, qrels_trec20, METRICS)
+        # results_from_file = evaluate(result, qrels_trec20, METRICS)
         # print(results_from_dict)
-        print(f"results from {args.dataset_file} on {qrels_trec20}")
-        print(results_from_file)
+        # print(f"results from {args.dataset_file} on {qrels_trec20}")
+        # print(results_from_file)
 
 
 if __name__ == "__main__":
