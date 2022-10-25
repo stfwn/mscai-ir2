@@ -61,7 +61,7 @@ def main():
         print('Saved faiss index to disk')
         
     print('got this far')
-    print(docs.get_nearest_examples("passage_embedding", model.encode("hello world"), k=10))
+    print(passages.get_nearest_examples("passage_embedding", model.encode("hello world"), k=10))
     # # Load queries and qrels
     # trec19 = TREC2019()
     # queries_trec19 = trec19.get_queries()["test"]
