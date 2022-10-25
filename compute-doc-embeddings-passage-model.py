@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from collections import defaultdict
 import os
 from pathlib import Path
+from typing import Callable
 
 import datasets
 import faiss
@@ -26,47 +27,22 @@ def main(args):
     model = model.model.to(device)
     model.eval()
 
-    print("==> Loading flattened passage embeddings")
+    print("==> Loading passage embeddings")
     ds = datasets.load_from_disk(
         Path(
-            "./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened"
+            "./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model"
         )
-    ).sort("passage_id")
-
-    # Hack needed because the dataset was flattened previously.
-    idxs_per_doc = defaultdict(list)
-
-    def find_idxs_per_doc(passage_id, idxs):
-        for pid, i in zip(passage_id, idxs):
-            idxs_per_doc[pid.split("_")[0]].append(i)
-
-    ds.map(
-        find_idxs_per_doc,
-        with_indices=True,
-        batched=True,
-        batch_size=10000,
-        input_columns="passage_id",
     )
-    # Hard to do this in a batched way now because of the flattened structure.
-    docs = {"doc_id": [], "doc_embedding": []}
-    n_docs = len(idxs_per_doc.keys())
-    raise NotImplementedError("There might be docs missing.")
-    if int(n_docs / args.n_shards) != n_docs / args.n_shards:
-        raise ValueError("Number of docs not cleanly divisible by number of shards")
-    from_ = int((args.shard * n_docs / args.n_shards) * n_docs)
-    to = int(((args.shard + 1) * n_docs / args.to_doc_idx) * n_docs + 1)
-    for doc_id, indices in tqdm(list(idxs_per_doc.items())[from_:to]):
-        passage_embeddings = torch.vstack(
-            [torch.tensor(e) for e in ds.select(indices)["passage_embedding"]]
-        )
-        with torch.no_grad():
-            docs["doc_embedding"].append(model([passage_embeddings]).squeeze().numpy())
-            docs["doc_id"].append(doc_id)
-    ds = datasets.Dataset.from_dict(docs)
-    new_dataset_dir = f"./data/ms-marco/doc-embeddings/passage-transformer-v1-shard-{args.shard}-of-{args.n_shards}"
+
+    ds = ds.map(
+        encode,
+        fn_kwargs={"encode_fn": model, "device": device},
+        batched=True,
+        batch_size=64,
+    )
+    new_dataset_dir = f"./data/ms-marco/doc-embeddings/passage-transformer-v1"
     print("==> Saving dataset to:", new_dataset_dir)
     ds.save_to_disk(new_dataset_dir)
-    exit(0)
 
     print("==> Computing FAISS index")
     ds.add_faiss_index(
@@ -74,6 +50,22 @@ def main(args):
         metric_type=faiss.METRIC_INNER_PRODUCT,
     )
     ds.save_faiss_index("doc_embedding", new_dataset_dir + "/doc-embedding-index.faiss")
+
+
+def encode(batch, encode_fn: Callable, device: str):
+    docs_passages = [
+        torch.vstack(
+            [torch.tensor(p["passage_embedding"], device=device) for p in doc_passages]
+        )
+        for doc_passages in batch["passages"]
+    ]
+    with torch.no_grad():
+        doc_embeddings = encode_fn(docs_passages).cpu().numpy()
+    batch["doc_embedding"] = list(doc_embeddings)
+    del batch["passages"]
+    del batch["url"]
+    del batch["title"]
+    return batch
 
 
 class PassageModelWrapper(nn.Module):
