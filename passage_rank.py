@@ -96,23 +96,24 @@ def main():
         for query_id, ranking, name in results_max:
             f.write(to_trec(query_id, ranking, name))
 
-    result_file = "./data/results/" + name + "mean.tsv"
-    with open(result_file, "w") as f:
-        for query_id, ranking, name in results_mean:
-            f.write(to_trec(query_id, ranking, name))
+    # result_file = "./data/results/" + name + "mean.tsv"
+    # with open(result_file, "w") as f:
+    #     for query_id, ranking, name in results_mean:
+    #         f.write(to_trec(query_id, ranking, name))
 
-    result_file = "./data/results/" + name + "sum.tsv"
-    with open(result_file, "w") as f:
-        for query_id, ranking, name in results_sum:
-            f.write(to_trec(query_id, ranking, name))
+    # result_file = "./data/results/" + name + "sum.tsv"
+    # with open(result_file, "w") as f:
+    #     for query_id, ranking, name in results_sum:
+    #         f.write(to_trec(query_id, ranking, name))
 
 
-    Load queries and qrels
+    # Load queries and qrels
     trec20 = TREC2020()
     queries_trec20 = trec20.get_queries()["test"]
     qrels_trec20 = "./data/trec/2020qrels-docs.tsv"
     # Rank
     name = "passages-trec20-ranking"
+    print('writing to {}'.format(name))
     results_max = []
     results_mean = []
     results_sum = []
@@ -159,6 +160,7 @@ def main():
     qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
     # Rank
     name = "passages-ms-marco-ranking"
+    print('writing to {}'.format(name))
     results_max = []
     # results_mean = []
     # results_sum = []
