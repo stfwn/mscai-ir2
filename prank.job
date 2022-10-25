@@ -20,4 +20,4 @@ cd ~/mscai-ir2/
 source activate mscai-ir2
 
 # Run
-srun python3 score_aggregation.py
+srun python3 passage_rank.py
