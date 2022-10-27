@@ -2,15 +2,14 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Callable
 import os
-
 import datasets
-from datasets import Dataset
+# import datasets
+# from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
 
 import config
 from data import MSMarcoDocs
-import encoding
 import preprocessing
 
 
@@ -25,7 +24,6 @@ def main(args):
     model = SentenceTransformer(args.model_path).to(
         device
     )
-
     print("==> Loading docs shard")
     ms_marco_docs = MSMarcoDocs()
     docs = (
@@ -38,6 +36,7 @@ def main(args):
         )
         .filter(lambda d: d["body"] != "" and d["body"] is not None)
     )
+
     print("==> Preprocessing docs")
     docs = docs.map(
         preprocessing.doc_to_longformer_input,
@@ -48,14 +47,14 @@ def main(args):
 
     print("==> Computing doc embeddings")
     embeddings = model.encode([doc['body'] for doc in docs], batch_size=args.batch_size, device=device, show_progress_bar=True)
-    for doc, embedding in zip(docs, embeddings):
-        doc['embedding'] = embedding 
-        del doc['body']
-    
-    print("==> Saving dataset with passage embeddings to disk")
-    dataset_dir = Path("./longformer/embeddings/") / "+".join(
-        sorted([f"{k}={v}" for k, v in vars(args).items()])
-    )
+
+    # Add doc embeddings to dataset and remove the body column
+    docs = docs.remove_columns('body')
+    embeddings = datasets.Dataset.from_dict({"embedding": embeddings})
+    docs = datasets.concatenate_datasets([docs, embeddings], axis=1)
+
+    print("==> Saving dataset with doc embeddings to disk")
+    dataset_dir = Path(f"./longformer/embeddings/passage_size-{args.passage_size}-shard_index-{args.shard_index}") 
     print(f"== Dir:", dataset_dir)
     docs.save_to_disk(dataset_dir)
 
