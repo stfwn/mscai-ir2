@@ -84,7 +84,7 @@ def main():
         b = time.time()
         if i % 10 == 0:
             print(f"Done {i}/{len(queries_trec20)} queries in {b-a} sec")
-        ranking = rank(query, passages, modle)["ranking"]
+        ranking = rank(query, passages, model)["ranking"]
         results_max.append((query["query_id"], ranking, name+'max'))
 
     result_file = "./data/results/" + name + "max.tsv"
