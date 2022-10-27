@@ -48,7 +48,7 @@ def batch_rank(queries, docs):
     query_embeddings = np.array(queries['embedding'], dtype=np.float32)
     
     scores, retrieved_docs = docs.get_nearest_examples_batch(
-        'embeddings', query_embeddings, k=config.ranking_size
+        'passage_embedding', query_embeddings, k=config.ranking_size
     )
     parsed_scores = [dict(zip(ret_docs["doc_id"], score)) for score, ret_docs in zip(scores, retrieved_docs)]
     queries = queries.add_column('ranking', parsed_scores)
@@ -56,8 +56,7 @@ def batch_rank(queries, docs):
 
 
 def main(args):
-    if args.disable_caching:
-        disable_caching()
+    disable_caching()
 
     # Load index
     docs = Dataset.load_from_disk(args.dataset_file)
@@ -69,7 +68,7 @@ def main(args):
     queries_msmarco = Dataset.load_from_disk('./data/embeddings/queries-msmarco-dev')
 
     # Encode queries (dict --> trec) and get rankings (dict)
-    name = "longformer-ms-marco-ranking"
+    name = "passage-ms-marco-ranking"
     results = batch_rank(queries_msmarco, docs)
     result_file = "./data/results/" + name + ".tsv"
     with open(result_file, "w") as f:
@@ -80,7 +79,7 @@ def main(args):
 
     queries_trec19 = Dataset.load_from_disk('./data/embeddings/queries-trec19')
     
-    name = "longformer-trec19-ranking"
+    name = "passage-trec19-ranking"
     results = batch_rank(queries_trec19, docs)
     result_file = "./data/results/" + name + ".tsv"
     with open(result_file, "w") as f:
@@ -90,7 +89,7 @@ def main(args):
     # Load queries (ds) and qrels (trec)
     queries_trec20 = Dataset.load_from_disk('./data/embeddings/queries-trec20')
 
-    name = "longformer-trec20-ranking"
+    name = "passage-trec20-ranking"
     results = batch_rank(queries_trec20, docs)
     result_file = "./data/results/" + name + ".tsv"
     with open(result_file, "w") as f:
