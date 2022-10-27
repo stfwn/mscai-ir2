@@ -59,7 +59,7 @@ def main(args):
     disable_caching()
 
     # Load index
-    docs = Dataset.load_from_disk(args.dataset_file)
+    docs = Dataset.load_from_disk('./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/')
     docs.add_faiss_index(column="passage_embedding", metric_type=faiss.METRIC_INNER_PRODUCT)
 
     print('Ranking MSMarco')
