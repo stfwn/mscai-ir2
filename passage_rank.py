@@ -5,6 +5,7 @@ import json
 import time
 
 from datasets import Dataset
+from datasets import disable_caching
 from sentence_transformers import SentenceTransformer, util
 import torch
 import numpy as np
@@ -22,7 +23,6 @@ def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     )
     query["ranking"] = dict(zip(retrieved_docs["passage_id"], scores))
     return query
-
 
 def to_trec(query_id: str, ranking: dict, name: str) -> str:
     result = ""
@@ -42,7 +42,7 @@ def to_trec(query_id: str, ranking: dict, name: str) -> str:
 
 
 def main():
-
+    disable_caching()
     # Load model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"using device {device}")
