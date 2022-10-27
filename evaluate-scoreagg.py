@@ -10,6 +10,7 @@ import torch
 # from ir_measures import *
 # import ir_measures
 import numpy as np
+import faiss
 
 import config
 from data import MSMarcoDocs, TREC2019, TREC2020
