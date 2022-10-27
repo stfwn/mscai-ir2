@@ -21,4 +21,5 @@ source activate mscai-ir2
 
 # Run
 # srun python3 -u embed_queries.py --path-to-model sentence-transformers/msmarco-distilbert-dot-v5 --disable-caching True --save-dir ./data/embeddings
-srun python3 -u evaluate-scoreagg.py -d ./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/ 
+# srun python3 -u evaluate-scoreagg.py -d ./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model+flattened/ 
+srun python3 -u passage_rank.py
