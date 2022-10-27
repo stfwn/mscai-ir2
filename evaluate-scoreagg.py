@@ -106,5 +106,8 @@ if __name__ == "__main__":
         type=str,
         help="Path to Huggingface Dataset (.arrow) of documents to rank.",
     )
+    argparser.add_argument(
+        '--disable-caching', default=False, type=bool
+    )
     args = argparser.parse_args()
     main(args)
