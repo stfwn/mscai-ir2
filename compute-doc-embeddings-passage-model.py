@@ -32,13 +32,15 @@ def main(args):
         Path(
             "./data/ms-marco/passage-embeddings/passage_size=512+prepend_title_to_passage=True+tokenization_method=model"
         )
-    )
+    ).sort("doc_id")
 
     ds = ds.map(
         encode,
         fn_kwargs={"encode_fn": model, "device": device},
         batched=True,
-        batch_size=64,
+        batch_size=1,
+        input_columns=["doc_id", "passages"],
+        remove_columns=["passages"],
     )
     new_dataset_dir = f"./data/ms-marco/doc-embeddings/passage-transformer-v1"
     print("==> Saving dataset to:", new_dataset_dir)
@@ -52,20 +54,16 @@ def main(args):
     ds.save_faiss_index("doc_embedding", new_dataset_dir + "/doc-embedding-index.faiss")
 
 
-def encode(batch, encode_fn: Callable, device: str):
+def encode(batch_doc_ids, batch_passages, encode_fn: Callable, device: str):
     docs_passages = [
         torch.vstack(
             [torch.tensor(p["passage_embedding"], device=device) for p in doc_passages]
-        )
-        for doc_passages in batch["passages"]
+        )[:1024, :]
+        for doc_passages in batch_passages
     ]
     with torch.no_grad():
         doc_embeddings = encode_fn(docs_passages).cpu().numpy()
-    batch["doc_embedding"] = list(doc_embeddings)
-    del batch["passages"]
-    del batch["url"]
-    del batch["title"]
-    return batch
+    return {"doc_embedding": list(doc_embeddings)}
 
 
 class PassageModelWrapper(nn.Module):
