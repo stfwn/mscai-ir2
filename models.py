@@ -18,7 +18,7 @@ class PassageTransformer(Module):
         self.d_model = d_model
         self.dim_feedforward = dim_feedforward
         self.nhead = nhead
-        self.num_layers = 1
+        self.num_layers = num_layers
         self.pooling_method = pooling_method
         encoder_layer = TransformerEncoderLayer(
             d_model=d_model,
