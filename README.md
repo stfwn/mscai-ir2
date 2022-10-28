@@ -38,5 +38,6 @@ python merge-passage-embeddings-shards.py -n $n
 2. Follow the steps for computing the passage representation dataset
 3. Create the training dataset using `python create-training-dataset.py`
 4. Train the passage model using `python train-passage-model.py --version 1`
-5. Evaluate the resulting doc embeddings using `evaluation.py` with the right
-   arguments: TODO: THIJS, doc embedding dataset dir: `data/ms-marco/doc-embeddings/passage-transformer-v1`).
+5. Rank the resulting doc embeddings using `rank.py` with the right
+   arguments: -d (doc embedding dataset dir:) `data/ms-marco/doc-embeddings/passage-transformer-v1`)
+              -f (faiss index .faiss file:) 'data/ms-marco/doc-embeddings/index.faiss' 
