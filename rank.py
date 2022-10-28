@@ -6,16 +6,12 @@ import json
 from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
-# from ir_measures import *
-# import ir_measures
 import numpy as np
 
 import config
 from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
-
-# METRICS = [RR@10, nDCG@10, R@1000, nDCG, RR, AP, P @ 1, P @ 5, P @ 20, P @ 100, R @ 100]
 
 """
 Evaluation
@@ -45,14 +41,6 @@ def to_trec(query_id: str, ranking: dict, name: str) -> str:
         result += f"{query_id}\t0\t{doc_id}\t{i+1}\t{score}\t{name}\n"
     return result
 
-
-# def evaluate(run, qrels_path: str, metrics: list) -> dict:
-#     if isinstance(run, str):
-#         run = ir_measures.read_trec_run(run)
-#     qrels = ir_measures.read_trec_qrels(qrels_path)
-#     return ir_measures.calc_aggregate(metrics, qrels, run)
-
-
 def main(args):
 
     # Load index
@@ -73,7 +61,6 @@ def main(args):
 
         # Load queries (ds) and qrels (trec)
         queries_msmarco = ms_marco_docs.get_queries()["dev"]
-        # queries_msmarco = Dataset.load_from_disk('./data/ms-marco/query-embeddings/dev/')
         qrels_msmarco = "./data/ms-marco/msmarco-docdev-qrels.tsv"
 
         # Encode queries (dict --> trec) and get rankings (dict)
@@ -89,11 +76,6 @@ def main(args):
         with open(result_file, "w") as f:
             for query_id, ranking, name in results:
                 f.write(to_trec(query_id, ranking, name))
-                
-        # Evaluate (either from dict or from TREC formatted file)
-        # results_from_file = evaluate(result_file, qrels_msmarco, METRICS)
-        # print(f"results from {args.dataset_file} on {qrels_msmarco}")
-        # print(results_from_file)
 
     trec = True
     if trec:
@@ -106,21 +88,13 @@ def main(args):
         # Encode queries (ds) and get rankings (dict)
         name = args.dataset_file.split("/")[3] + "-trec19-ranking"
         result = "./data/results/" + name + ".tsv"
-        # run_trec19 = {}
         with open(result, "w") as f:
             for i, query in enumerate(queries_trec19):
                 if i % 100 == 0:
                     print(f"Done {i}/{len(queries_trec19)} queries.")
                 ranking = rank(query, docs, model)["ranking"]
-                # run_trec19.update({query['query_id'] : ranking})
                 f.write(to_trec(query["query_id"], ranking, name))
 
-        # Evaluate (either from dict or from TREC formatted file)
-        # results_from_dict = evaluate(run_trec19, qrels_trec19, METRICS)
-        # results_from_file = evaluate(result, qrels_trec19, METRICS)
-        # print(results_from_dict)
-        # print(f"results from {args.dataset_file} on {qrels_trec19}")
-        # print(results_from_file)
 
         # Initialize TREC 2020
         trec20 = TREC2020()
@@ -132,21 +106,12 @@ def main(args):
         # Encode queries (ds) and get rankings (dict)
         name = args.dataset_file.split('/')[3] + "-trec20-ranking"
         result = './data/results/'+name+'.tsv'
-        # run_trec20 = {}
         with open(result, 'w') as f:
             for i, query in enumerate(queries_trec20):
                 if i%100 == 0:
                     print(f"Done {i}/{len(queries_trec20)} queries.")
                 ranking = rank(query, docs, model)['ranking']
-                # run_trec19.update({query['query_id'] : ranking})
                 f.write(to_trec(query['query_id'], ranking, name))
-
-        # Evaluate (either from dict or from TREC formatted file)
-        # results_from_dict = evaluate(run_trec20, qrels_trec20, METRICS)
-        # results_from_file = evaluate(result, qrels_trec20, METRICS)
-        # print(results_from_dict)
-        # print(f"results from {args.dataset_file} on {qrels_trec20}")
-        # print(results_from_file)
 
 
 if __name__ == "__main__":
