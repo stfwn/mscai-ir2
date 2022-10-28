@@ -46,8 +46,9 @@ python merge-passage-embeddings-shards.py -n $n
 6. Evaluate the rankings with `evaluate.py` using `-q (path to qrels)` and `-r (path to ranking)`
    
 ## Computing Score MaxP
-
-4. Flatten the Passage Representation dataset with:
+1. Follow the steps for initializing your environment and obtaining the raw data.
+2. Follow the steps for computing the passage representation dataset
+3. Flatten the Passage Representation dataset with:
 ```bash
 n=20
 for k in {0..n}
@@ -56,11 +57,11 @@ do
 done
 ```
 
-5. Merge the shards with:
+4. Merge the shards with:
 ```bash
 python stich_Pdatasets.py -n 20
 ```
 
-6. Compute the rankings with `passage_rank.py`
-7. Evaluate and compute the positional bias histograms using `eval_score_max.ipynb`
+5. Compute the rankings with `passage_rank.py`
+6. Evaluate and compute the positional bias histograms using `eval_score_max.ipynb`
 
