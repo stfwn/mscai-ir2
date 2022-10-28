@@ -65,3 +65,8 @@ python stich_Pdatasets.py -n 20
 5. Compute the rankings with `passage_rank.py`
 6. Evaluate and compute the positional bias histograms using `eval_score_max.ipynb`
 
+## Computing Embedding MaxP, MeanP, SumP and FirstP
+1. Follow the steps for initializing your environment and obtaining the raw data.
+2. Compute the embedding pooling dataset using `compute-passage-pooling-doc-embedding-dataset.py` with `-m` in `[mean, max, sum, first]`
+3. Rank resulting doc embeddings using `rank.py` with `-d (path to the dataset)` and `-f (path to the faiss index file)`
+4. Evaluate the rankings with `evaluate.py` using `-q (path to qrels)` and `-r (path to ranking)`
