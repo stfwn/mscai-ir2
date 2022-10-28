@@ -9,7 +9,6 @@ from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
 
-import config
 from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing

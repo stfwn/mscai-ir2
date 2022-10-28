@@ -8,7 +8,6 @@ from sentence_transformers import SentenceTransformer, util
 import torch
 import numpy as np
 
-import config
 from data import MSMarcoDocs, TREC2019, TREC2020
 import encoding
 import preprocessing
@@ -25,11 +24,11 @@ Output:
         output = {measure: value}
 
 """
-
+ranking_size = 1000
 
 def rank(query: dict, docs: Dataset, model: SentenceTransformer) -> dict:
     scores, retrieved_docs = docs.get_nearest_examples(
-        "embedding", model.encode(query["text"]), k=config.ranking_size
+        "embedding", model.encode(query["text"]), k=ranking_size
     )
     query["ranking"] = dict(zip(retrieved_docs["doc_id"], scores))
     return query

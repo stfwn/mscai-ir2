@@ -8,7 +8,6 @@ from datasets import Dataset
 from sentence_transformers import SentenceTransformer, util
 import torch
 
-import config
 from data import MSMarcoDocs
 import encoding
 import preprocessing
