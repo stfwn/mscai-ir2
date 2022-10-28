@@ -1,5 +1,3 @@
-https://www.overleaf.com/2354611475wtkmfxsqzhgt
-
 ## Initialize environment and obtain the raw data
 
 ```bash
