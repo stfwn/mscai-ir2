@@ -37,5 +37,30 @@ python merge-passage-embeddings-shards.py -n $n
 3. Create the training dataset using `python create-training-dataset.py`
 4. Train the passage model using `python train-passage-model.py --version 1`
 5. Rank the resulting doc embeddings using `rank.py` with the right
-   arguments: -d (doc embedding dataset dir:) `data/ms-marco/doc-embeddings/passage-transformer-v1`)
-              -f (faiss index .faiss file:) 'data/ms-marco/doc-embeddings/index.faiss' 
+   arguments: 
+   ```bash
+   python rank.py
+          -d data/ms-marco/doc-embeddings/passage-transformer-v1
+          -f data/ms-marco/doc-embeddings/passage-transformer-v1index.faiss
+   ```
+6. Evaluate the rankings with `evaluate.py` using `-q (path to qrels)` and `-r (path to ranking)`
+   
+## Computing Score MaxP
+
+4. Flatten the Passage Representation dataset with:
+```bash
+n=20
+for k in {0..n}
+do
+    python flatten_Pdataset.py -n $n -k $k
+done
+```
+
+5. Merge the shards with:
+```bash
+python stich_Pdatasets.py -n 20
+```
+
+6. Compute the rankings with `passage_rank.py`
+7. Evaluate and compute the positional bias histograms using `eval_score_max.ipynb`
+
