@@ -93,4 +93,3 @@ def doc_to_longformer_input(
             doc['body'] = doc['body'][:passage_size]
     
     return doc
-    

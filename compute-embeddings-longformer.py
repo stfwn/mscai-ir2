@@ -1,14 +1,9 @@
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Callable
-import os
 import datasets
-# import datasets
-# from datasets import Dataset
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer
 import torch
 
-import config
 from data import MSMarcoDocs
 import preprocessing
 
@@ -18,7 +13,7 @@ def main(args):
     print("Number of shards:", args.n_shards)
     print("Computing shard:", args.shard_index)
     print("=" * 10)
-
+    
     print("==> Initializing model")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = SentenceTransformer(args.model_path).to(
@@ -58,7 +53,6 @@ def main(args):
     print(f"== Dir:", dataset_dir)
     docs.save_to_disk(dataset_dir)
 
-
 if __name__ == "__main__":
     argparser = ArgumentParser()
     argparser.add_argument("-n", "--n-shards", type=int, help="Total number of shards.")
@@ -80,10 +74,10 @@ if __name__ == "__main__":
         "--prepend-title-to-passage", action="store_true", default=True
     )
     argparser.add_argument(
-        "--model_path", default='allenai/longformer-base-4096'
+        "--model-path", default='allenai/longformer-base-4096'
     )
     argparser.add_argument(
-        "--batch_size", default=32, type=int
+        "--batch-size", default=32, type=int
     )
 
     args = argparser.parse_args()
