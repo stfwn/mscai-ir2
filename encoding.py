@@ -1,4 +1,5 @@
 from typing import Callable, Literal
+from sentence_transformers import SentenceTransformer, util
 
 import torch
 import numpy as np
@@ -44,3 +45,10 @@ def encode_doc(
     else:
         raise NotImplementedError
     return doc
+
+def encode_doc_longformer(
+    doc: dict,
+    model,
+):
+    doc['passages'] = model.encode(doc['passages']) 
+    return doc['passages']
